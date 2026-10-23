@@ -16,7 +16,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: #111216;
+      background: #000;
       color: #fff;
       font-family: Arial, Helvetica, sans-serif;
       font-weight: bold;
@@ -30,7 +30,7 @@
       flex-direction: column;
       border: 4px solid #ff2b2b;
       position: relative;
-      background: #17181d;
+      background: #141416;
     }
 
     .border-b { border-bottom: 3px solid #ff2b2b; }
@@ -49,7 +49,6 @@
       font-weight: 900;
       letter-spacing: 1px;
       text-transform: uppercase;
-      text-shadow: 0 0 14px rgba(255, 40, 40, 0.95);
       line-height: 1.1;
     }
 
@@ -60,11 +59,10 @@
       font-size: clamp(18px, 2.6vw, 38px);
       font-weight: bold;
       margin-top: 0.5vh;
-      text-shadow: 0 0 10px rgba(255, 40, 40, 0.9);
       letter-spacing: 0.5px;
     }
 
-    /* AQI Big Display (No middle dividing line) */
+    /* AQI Big Display (Flat solid color, no glow) */
     .aqi-banner {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -79,7 +77,6 @@
       font-size: clamp(38px, 6.5vw, 84px);
       font-weight: 900;
       letter-spacing: 8px;
-      text-shadow: 0 0 18px rgba(255, 40, 40, 0.95);
       height: 100%;
       display: flex;
       align-items: center;
@@ -88,11 +85,10 @@
 
     .aqi-score {
       text-align: center;
-      color: #1affc2;
+      color: #00e699;
       font-size: clamp(44px, 8.5vw, 110px);
       font-weight: 900;
       letter-spacing: 1px;
-      text-shadow: 0 0 22px rgba(26, 255, 194, 1);
       height: 100%;
       display: flex;
       align-items: center;
@@ -121,7 +117,6 @@
       font-size: clamp(16px, 2.8vw, 42px);
       font-weight: bold;
       letter-spacing: 0.5px;
-      text-shadow: 0 0 10px rgba(255, 40, 40, 0.9);
       white-space: nowrap;
     }
 
@@ -130,14 +125,13 @@
       font-weight: 900;
       letter-spacing: 1px;
       white-space: nowrap;
-      text-shadow: 0 0 14px currentColor;
     }
 
-    /* LED Colors */
-    .val-green { color: #00ff73; }
-    .val-blue  { color: #6978ff; }
+    /* Flat High-Contrast LED Colors */
+    .val-green { color: #00e676; }
+    .val-blue  { color: #7388ff; }
     .val-cyan  { color: #00e5ff; }
-    .val-amber { color: #ffbe53; }
+    .val-amber { color: #ffab40; }
 
     /* Footer Info Bar */
     .footer-bar {
@@ -147,13 +141,13 @@
       padding: 0.4vh 1.8vw;
       font-size: clamp(11px, 1.3vw, 18px);
       font-weight: bold;
-      background: #0f1013;
-      color: #888;
+      background: #0a0a0c;
+      color: #777;
       flex-shrink: 0;
     }
 
-    .status-ok { color: #00ff73 !important; }
-    .status-fallback { color: #ffae42 !important; }
+    .status-ok { color: #00e676 !important; }
+    .status-fallback { color: #ffab40 !important; }
 
     /* Shutdown Screen */
     .shutdown-screen {
@@ -173,12 +167,6 @@
       letter-spacing: 3px;
       line-height: 1.3;
       text-transform: uppercase;
-      animation: ledPulse 2s infinite ease-in-out;
-    }
-
-    @keyframes ledPulse {
-      0%, 100% { opacity: 1; text-shadow: 0 0 25px rgba(255, 34, 34, 1), 0 0 50px rgba(255, 0, 0, 0.85); }
-      50% { opacity: 0.7; text-shadow: 0 0 12px rgba(255, 34, 34, 0.5); }
     }
   </style>
 </head>
@@ -194,7 +182,7 @@
       </div>
     </div>
 
-    <!-- AQI (Middle vertical line removed) -->
+    <!-- AQI (No middle divider line, no glow) -->
     <div class="aqi-banner border-b">
       <div class="aqi-title">A Q I -</div>
       <div class="aqi-score" id="aqiVal">54</div>
