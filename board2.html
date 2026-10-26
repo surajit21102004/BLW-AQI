@@ -18,65 +18,83 @@
       overflow: hidden;
       background: #000;
       color: #fff;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
       font-weight: bold;
       -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen-wrapper {
+      width: 100vw;
+      height: 100vh;
+      padding: clamp(8px, 1.2vh, 18px) clamp(8px, 1.2vw, 20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .screen {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
+      max-width: 1200px;
+      max-height: 820px;
       display: flex;
       flex-direction: column;
-      border: 4px solid #ff2b2b;
+      border: 3px solid #ff2b2b;
       position: relative;
-      background: #141416;
+      background: #121316;
+      box-shadow: 0 0 24px rgba(255, 43, 43, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
     }
 
-    .border-b { border-bottom: 3px solid #ff2b2b; }
-    .border-r { border-right: 3px solid #ff2b2b; }
+    .border-b { border-bottom: 2.5px solid #ff2b2b; }
+    .border-r { border-right: 2.5px solid #ff2b2b; }
 
-    /* Header Section */
     .header {
-      padding: 1vh 2vw 0.6vh;
+      padding: 0.9vh 2vw 0.7vh;
       text-align: center;
       flex-shrink: 0;
+      background: #14151a;
     }
 
     .title {
       color: #ff3333;
-      font-size: clamp(24px, 3.8vw, 54px);
+      font-size: clamp(18px, 2.4vw, 36px);
       font-weight: 900;
       letter-spacing: 1px;
       text-transform: uppercase;
-      line-height: 1.1;
+      line-height: 1.2;
     }
 
     .meta-row {
       display: flex;
       justify-content: space-between;
-      color: #ff3333;
-      font-size: clamp(18px, 2.6vw, 38px);
-      font-weight: bold;
-      margin-top: 0.5vh;
+      color: #ff3b3b;
+      font-size: clamp(14px, 1.6vw, 24px);
+      font-weight: 700;
+      margin-top: 0.4vh;
       letter-spacing: 0.5px;
+      padding: 0 0.5vw;
     }
 
-    /* AQI Big Display (Flat solid color, no glow) */
     .aqi-banner {
       display: grid;
       grid-template-columns: 1fr 1fr;
       align-items: center;
-      flex: 1.15;
+      flex: 1.1;
       min-height: 0;
+      background: #16171d;
     }
 
     .aqi-title {
       text-align: center;
       color: #ff3333;
-      font-size: clamp(38px, 6.5vw, 84px);
+      font-size: clamp(28px, 4vw, 54px);
       font-weight: 900;
-      letter-spacing: 8px;
+      letter-spacing: 6px;
       height: 100%;
       display: flex;
       align-items: center;
@@ -86,70 +104,54 @@
     .aqi-score {
       text-align: center;
       color: #00e699;
-      font-size: clamp(44px, 8.5vw, 110px);
+      font-size: clamp(34px, 5.5vw, 72px);
       font-weight: 900;
       letter-spacing: 1px;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* Measurements Grid */
     .grid-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: repeat(4, 1fr);
-      flex: 3.85;
+      flex: 4;
       min-height: 0;
+      background: #111215;
     }
 
     .cell {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0 3vw;
+      padding: 0 2.2vw;
       min-height: 0;
     }
 
     .label {
       color: #ff3333;
-      font-size: clamp(16px, 2.8vw, 42px);
-      font-weight: bold;
-      letter-spacing: 0.5px;
+      font-size: clamp(13px, 1.6vw, 22px);
+      font-weight: 700;
+      letter-spacing: 0.4px;
       white-space: nowrap;
     }
 
     .val {
-      font-size: clamp(20px, 3.4vw, 50px);
+      font-size: clamp(16px, 2.2vw, 32px);
       font-weight: 900;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* Flat High-Contrast LED Colors */
     .val-green { color: #00e676; }
     .val-blue  { color: #7388ff; }
     .val-cyan  { color: #00e5ff; }
     .val-amber { color: #ffab40; }
 
-    /* Footer Info Bar */
-    .footer-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.4vh 1.8vw;
-      font-size: clamp(11px, 1.3vw, 18px);
-      font-weight: bold;
-      background: #0a0a0c;
-      color: #777;
-      flex-shrink: 0;
-    }
-
-    .status-ok { color: #00e676 !important; }
-    .status-fallback { color: #ffab40 !important; }
-
-    /* Shutdown Screen */
     .shutdown-screen {
       width: 100%;
       height: 100%;
@@ -162,9 +164,9 @@
 
     .shutdown-msg {
       color: #ff2222;
-      font-size: clamp(32px, 6.5vw, 88px);
+      font-size: clamp(24px, 4.5vw, 60px);
       font-weight: 900;
-      letter-spacing: 3px;
+      letter-spacing: 2px;
       line-height: 1.3;
       text-transform: uppercase;
     }
@@ -172,70 +174,68 @@
 </head>
 
 <body>
-  <div class="screen" id="screenContainer">
+  <div class="screen-wrapper">
+    <div class="screen" id="screenContainer">
 
-    <div class="header border-b">
-      <div class="title">BANARAS LOCOMOTIVES WORKS (BLW)</div>
-      <div class="meta-row">
-        <span id="screenDate">Date: ----/--/--</span>
-        <span id="screenTime">Time: --:--:--</span>
+      <div class="header border-b">
+        <div class="title">BANARAS LOCOMOTIVE WORKS (BLW)</div>
+        <div class="meta-row">
+          <span id="screenDate">Date: ----/--/--</span>
+          <span id="screenTime">Time: --:--:--</span>
+        </div>
       </div>
+
+      <!-- AQI Display -->
+      <div class="aqi-banner border-b">
+        <div class="aqi-title border-r">A Q I -</div>
+        <div class="aqi-score" id="aqiVal">44</div>
+      </div>
+
+      <div class="grid-container">
+        <div class="cell border-r border-b">
+          <span class="label">PM 2.5 (µg/m³) -</span>
+          <span class="val val-green" id="pm25Val">22.9</span>
+        </div>
+        <div class="cell border-b">
+          <span class="label">PM 10 (µg/m³) -</span>
+          <span class="val val-green" id="pm10Val">34.09</span>
+        </div>
+
+        <div class="cell border-r border-b">
+          <span class="label">SOx (µg/m³) -</span>
+          <span class="val val-green" id="soxVal">12.23</span>
+        </div>
+        <div class="cell border-b">
+          <span class="label">NOx (µg/m³) -</span>
+          <span class="val val-green" id="noxVal">6.38</span>
+        </div>
+
+        <div class="cell border-r border-b">
+          <span class="label">CO (µg/m³) -</span>
+          <span class="val val-blue" id="coVal">151.58</span>
+        </div>
+        <div class="cell border-b">
+          <span class="label">O₃ (µg/m³) -</span>
+          <span class="val val-green" id="o3Val">3.69</span>
+        </div>
+
+        <div class="cell border-r">
+          <span class="label">Temp (°C) -</span>
+          <span class="val val-cyan" id="tempVal">18.86</span>
+        </div>
+        <div class="cell">
+          <span class="label">HUM (%RH) -</span>
+          <span class="val val-amber" id="humVal">61.3</span>
+        </div>
+      </div>
+
     </div>
-
-    <!-- AQI Display -->
-    <div class="aqi-banner border-b">
-      <div class="aqi-title">A Q I -</div>
-      <div class="aqi-score" id="aqiVal">44</div>
-    </div>
-
-    <div class="grid-container">
-      <div class="cell border-r border-b">
-        <span class="label">PM 2.5 (µg/m³) -</span>
-        <span class="val val-green" id="pm25Val">22.9</span>
-      </div>
-      <div class="cell border-b">
-        <span class="label">PM 10 (µg/m³) -</span>
-        <span class="val val-green" id="pm10Val">34.09</span>
-      </div>
-
-      <div class="cell border-r border-b">
-        <span class="label">SOx (µg/m³) -</span>
-        <span class="val val-green" id="soxVal">12.23</span>
-      </div>
-      <div class="cell border-b">
-        <span class="label">NOx (µg/m³) -</span>
-        <span class="val val-green" id="noxVal">6.38</span>
-      </div>
-
-      <div class="cell border-r border-b">
-        <span class="label">CO (µg/m³) -</span>
-        <span class="val val-blue" id="coVal">151.58</span>
-      </div>
-      <div class="cell border-b">
-        <span class="label">O₃ (µg/m³) -</span>
-        <span class="val val-green" id="o3Val">3.69</span>
-      </div>
-
-      <div class="cell border-r">
-        <span class="label">Temp (°C) -</span>
-        <span class="val val-cyan" id="tempVal">18.86</span>
-      </div>
-      <div class="cell">
-        <span class="label">HUM (%RH) -</span>
-        <span class="val val-amber" id="humVal">61.3</span>
-      </div>
-    </div>
-
-    <!-- <div class="footer-bar">
-      <span id="apiStatus" class="status-ok">● CONNECTING...</span>
-      <span id="lastUpdated">--</span>
-    </div> -->
-
   </div>
 
   <script>
     const IS_ACTIVE = true;
 
+    // Board 2 Fallback Parameters
     const CONSTANT_FALLBACK = {
       aqi: "44",
       pm25: "22.9",
@@ -278,7 +278,7 @@
         }
       }
 
-      function setFallbackData(reason = "API Issue") {
+      function setFallbackData() {
         document.getElementById('aqiVal').textContent  = CONSTANT_FALLBACK.aqi;
         document.getElementById('pm25Val').textContent = CONSTANT_FALLBACK.pm25;
         document.getElementById('pm10Val').textContent = CONSTANT_FALLBACK.pm10;
@@ -288,12 +288,6 @@
         document.getElementById('o3Val').textContent   = CONSTANT_FALLBACK.o3;
         document.getElementById('tempVal').textContent = CONSTANT_FALLBACK.temp;
         document.getElementById('humVal').textContent  = CONSTANT_FALLBACK.hum;
-
-        const statusEl = document.getElementById('apiStatus');
-        if (statusEl) {
-          statusEl.textContent = `● DEFAULT BACKUP MODE (${reason})`;
-          statusEl.className = 'status-fallback';
-        }
       }
 
       function calculateIndianAQI(pm25, pm10) {
@@ -308,17 +302,17 @@
         }
 
         const pm25BP = [
-          { cLow: 0, cHigh: 30, iLow: 0, iHigh: 50 },
-          { cLow: 31, cHigh: 60, iLow: 51, iHigh: 100 },
-          { cLow: 61, cHigh: 90, iLow: 101, iHigh: 200 },
-          { cLow: 91, cHigh: 120, iLow: 201, iHigh: 300 },
+          { cLow: 0,   cHigh: 30,  iLow: 0,   iHigh: 50 },
+          { cLow: 31,  cHigh: 60,  iLow: 51,  iHigh: 100 },
+          { cLow: 61,  cHigh: 90,  iLow: 101, iHigh: 200 },
+          { cLow: 91,  cHigh: 120, iLow: 201, iHigh: 300 },
           { cLow: 121, cHigh: 250, iLow: 301, iHigh: 400 },
           { cLow: 250, cHigh: 500, iLow: 401, iHigh: 500 }
         ];
 
         const pm10BP = [
-          { cLow: 0, cHigh: 50, iLow: 0, iHigh: 50 },
-          { cLow: 51, cHigh: 100, iLow: 51, iHigh: 100 },
+          { cLow: 0,   cHigh: 50,  iLow: 0,   iHigh: 50 },
+          { cLow: 51,  cHigh: 100, iLow: 51,  iHigh: 100 },
           { cLow: 101, cHigh: 250, iLow: 101, iHigh: 200 },
           { cLow: 251, cHigh: 350, iLow: 201, iHigh: 300 },
           { cLow: 351, cHigh: 430, iLow: 301, iHigh: 400 },
@@ -331,16 +325,14 @@
       }
 
       async function fetchAQIData() {
-        const statusEl = document.getElementById('apiStatus');
-        const updatedEl = document.getElementById('lastUpdated');
-
         try {
+          const cacheBuster = `&_t=${Date.now()}`;
           const [airRes, weatherRes] = await Promise.all([
-            fetch(AIR_URL).then(r => {
+            fetch(AIR_URL + cacheBuster).then(r => {
               if (!r.ok) throw new Error(`HTTP ${r.status}`);
               return r.json();
             }),
-            fetch(WEATHER_URL).then(r => {
+            fetch(WEATHER_URL + cacheBuster).then(r => {
               if (!r.ok) throw new Error(`HTTP ${r.status}`);
               return r.json();
             })
@@ -351,12 +343,9 @@
 
           if (!air || !weather) throw new Error("Empty API data");
 
-          // -------------------------------------------------------------
-          // 40% LESS LOGIC: (100% - 40% = 60% of original value -> 0.6)
-          // -------------------------------------------------------------
-          const SCALE_FACTOR = 0.6;
+          // Board 2 Scale Factor: 0.6 (40% less)
+          const SCALE_FACTOR = 0.5;
 
-          // সবকটি দূষণ প্যারামিটারকে একযোগে ৪০% কমিয়ে দেওয়া হলো
           const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
           const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
           const sox  = (air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox)) * SCALE_FACTOR;
@@ -364,15 +353,12 @@
           const co   = (air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co)) * SCALE_FACTOR;
           const o3   = (air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3)) * SCALE_FACTOR;
 
-          // আবহাওয়া ডেটা (তাপমাত্রা ও আর্দ্রতা অপরিবর্তিত)
           const temp = weather.temperature_2m ?? parseFloat(CONSTANT_FALLBACK.temp);
           const hum  = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
 
-          // কমানো PM2.5 ও PM10 থেকেই ক্যালকুলেট হচ্ছে, যাতে ভ্যালুর সাথে AQI সামঞ্জস্যপূর্ণ থাকে
           let calculatedAQI = calculateIndianAQI(pm25, pm10);
           if (!calculatedAQI || calculatedAQI <= 0) calculatedAQI = 44;
 
-          // স্ক্রিনে ভ্যালু আপডেট
           document.getElementById('aqiVal').textContent  = calculatedAQI;
           document.getElementById('pm25Val').textContent = pm25.toFixed(1);
           document.getElementById('pm10Val').textContent = pm10.toFixed(2);
@@ -383,24 +369,20 @@
           document.getElementById('tempVal').textContent = temp.toFixed(2);
           document.getElementById('humVal').textContent  = hum.toFixed(1);
 
-          statusEl.textContent = '● LIVE SENSOR FEED';
-          statusEl.className = 'status-ok';
-          updatedEl.textContent = 'Updated: ' + new Date().toLocaleTimeString();
-
         } catch (err) {
-          console.warn('API error, active fallback mode:', err);
-          setFallbackData('Offline / Error');
-          if (updatedEl) updatedEl.textContent = 'Fallback Active';
+          console.warn('API error, using fallback:', err);
+          setFallbackData();
         }
       }
 
       setInterval(updateClock, 1000);
       updateClock();
 
-      setFallbackData('Initialising');
-
+      // Page load-e prothom call
       fetchAQIData();
-      setInterval(fetchAQIData, 5 * 60 * 1000);
+
+      // Refresh chara prottek 5 second por por call (5000 ms)
+      setInterval(fetchAQIData, 5000);
     }
   </script>
 </body>
