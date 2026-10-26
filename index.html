@@ -341,7 +341,7 @@
 
           if (!air || !weather) throw new Error("Empty API data");
 
-          const SCALE_FACTOR = 0.5;
+          const SCALE_FACTOR = 0.4;
 
           const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
           const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
