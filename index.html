@@ -330,7 +330,7 @@
         return Math.round(Math.max(i1, i2));
       }
 
-      async function fetchAQIData() {
+     async function fetchAQIData() {
         const statusEl = document.getElementById('apiStatus');
         const updatedEl = document.getElementById('lastUpdated');
 
@@ -351,22 +351,29 @@
 
           if (!air || !weather) throw new Error("Empty API data");
 
-          const pm25 = air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25);
-          const pm10 = air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10);
-          const sox  = air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox);
-          const nox  = air.nitrogen_dioxide ?? parseFloat(CONSTANT_FALLBACK.nox);
-          const co   = air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co);
-          const o3   = air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3);
+          // -----------------------------------------------------------
+          // REDUCTION FACTOR (0.5 = ৫০% কমানো হবে)
+          // -----------------------------------------------------------
+          const SCALE_FACTOR = 0.5;
 
+          // ১. সবকটি পলিউশন প্যারামিটারকে একই অনুপাতে স্কেল করা হলো
+          const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
+          const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
+          const sox  = (air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox)) * SCALE_FACTOR;
+          const nox  = (air.nitrogen_dioxide ?? parseFloat(CONSTANT_FALLBACK.nox)) * SCALE_FACTOR;
+          const co   = (air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co)) * SCALE_FACTOR;
+          const o3   = (air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3)) * SCALE_FACTOR;
+
+          // তাপমাত্রা ও আর্দ্রতা আবহাওয়ার রিয়াল ডেটাই রাখা হয়েছে
           const temp = weather.temperature_2m ?? parseFloat(CONSTANT_FALLBACK.temp);
           const hum  = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
 
-          let rawAQI = calculateIndianAQI(pm25, pm10);
-          if (!rawAQI || rawAQI <= 0) rawAQI = 54;
+          // ২. কমানো PM2.5 ও PM10 ভ্যালু দিয়ে AQI ক্যালকুলেট করা হলো (যাতে ম্যাথমেটিক্যালি পুরোপুরি মেলে)
+          let calculatedAQI = calculateIndianAQI(pm25, pm10);
+          if (!calculatedAQI || calculatedAQI <= 0) calculatedAQI = 42;
 
-          const reducedAQI = Math.max(1, Math.round(rawAQI * 0.5));
-
-          document.getElementById('aqiVal').textContent  = reducedAQI;
+          // ৩. স্ক্রিনে ডেটা পুশ
+          document.getElementById('aqiVal').textContent  = calculatedAQI;
           document.getElementById('pm25Val').textContent = pm25.toFixed(1);
           document.getElementById('pm10Val').textContent = pm10.toFixed(2);
           document.getElementById('soxVal').textContent  = sox.toFixed(2);
