@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLW System Installation & Provisioning Console</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter and JetBrains Mono for telemetry/terminal precision -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons for Industrial UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"Fira Code"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#ecfeff',
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            900: '#164e63',
+                        },
+                        tech: {
+                            darkest: '#080c14',
+                            dark: '#0f172a',
+                            panel: '#131e32',
+                            border: '#1e2e4a',
+                            accent: '#38bdf8',
+                            success: '#10b981',
+                            warning: '#f59e0b',
+                            danger: '#ef4444'
+                        }
+                    },
+                    keyframes: {
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(1000%)' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.4', filter: 'drop-shadow(0 0 8px rgba(34, 211, 238, 0.4))' },
+                            '50%': { opacity: '0.8', filter: 'drop-shadow(0 0 18px rgba(34, 211, 238, 0.9))' }
+                        }
+                    },
+                    animation: {
+                        scanline: 'scanline 8s linear infinite',
+                        pulseGlow: 'pulseGlow 2.5s ease-in-out infinite'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar for terminal & telemetry panels */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        .cyber-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-tech-darkest text-slate-100 font-sans min-h-screen selection:bg-brand-500 selection:text-white relative overflow-x-hidden cyber-grid flex flex-col justify-between">
+
+    <!-- Top Glow / Vignette Accent -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-5xl h-36 bg-cyan-500/10 blur-[120px] pointer-events-none -z-10"></div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-6 flex-grow">
+
+        <!-- HEADER / TELEMETRY METRIC BAR -->
+        <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-tech-border pb-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-lg bg-tech-panel border border-brand-500/40 flex items-center justify-center text-brand-400 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+                    <i class="fa-solid fa-microchip text-xl animate-pulse"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs tracking-widest font-mono text-cyan-400 font-bold uppercase bg-cyan-950/70 border border-cyan-800/80 px-2 py-0.5 rounded">BLW-OS v4.12</span>
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            BUS ACTIVE
+                        </span>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                        BLW Code Installation & System Provisioning
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Controller Controls & Tools -->
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-end">
+                <!-- Sound Toggle -->
+                <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-2 rounded-lg bg-tech-panel border border-tech-border text-slate-300 hover:text-white hover:border-slate-500 text-xs font-mono flex items-center gap-2 transition">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-brand-400"></i>
+                    <span id="soundLabel">Audio: ON</span>
+                </button>
+
+                <!-- Fast Forward Toggle (Useful for 1-minute test demo) -->
+                <button id="speedToggleBtn" onclick="toggleSpeed()" class="px-3 py-2 rounded-lg bg-tech-panel border border-brand-500/40 text-cyan-300 hover:bg-cyan-950/40 text-xs font-mono flex items-center gap-2 transition shadow-sm">
+                    <i class="fa-solid fa-forward-fast text-yellow-400"></i>
+                    <span id="speedLabel">Mode: 1x (Real 60s)</span>
+                </button>
+
+                <!-- Restart Button -->
+                <button onclick="resetInstallation()" class="px-3 py-2 rounded-lg bg-tech-panel border border-tech-border text-slate-400 hover:text-rose-400 hover:border-rose-500/50 text-xs font-mono flex items-center gap-2 transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Restart</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- TELEMETRY SNAPSHOT GRID -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-3.5 backdrop-blur-sm">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 flex justify-between items-center">
+                    <span>Deploy Phase</span>
+                    <i class="fa-solid fa-server text-cyan-400 text-xs"></i>
+                </div>
+                <div id="telemetryPhase" class="text-base sm:text-lg font-semibold text-white mt-1 font-mono truncate">
+                    Connecting Endpoints
+                </div>
+                <div class="text-[11px] text-cyan-400/80 font-mono mt-0.5" id="telemetrySub">Port 8080: Handshaking</div>
+            </div>
+
+            <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-3.5 backdrop-blur-sm">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 flex justify-between items-center">
+                    <span>Target Hardware</span>
+                    <i class="fa-solid fa-memory text-emerald-400 text-xs"></i>
+                </div>
+                <div class="text-base sm:text-lg font-semibold text-white mt-1 font-mono">
+                    BOARD 1 (REV-3)
+                </div>
+                <div class="text-[11px] text-emerald-400 font-mono mt-0.5">ARM64 • Telemetry Ready</div>
+            </div>
+
+            <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-3.5 backdrop-blur-sm">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 flex justify-between items-center">
+                    <span>Elapsed Time</span>
+                    <i class="fa-regular fa-clock text-yellow-400 text-xs"></i>
+                </div>
+                <div id="elapsedTimerDisplay" class="text-base sm:text-lg font-semibold text-white mt-1 font-mono">
+                    00:00.0s
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1">
+                    CP1 target: <span class="text-yellow-400 font-medium" id="cp1TargetText">~01:00</span>
+                </div>
+            </div>
+
+            <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-3.5 backdrop-blur-sm">
+                <div class="text-[11px] font-mono uppercase tracking-wider text-slate-400 flex justify-between items-center">
+                    <span>System Integrity</span>
+                    <i class="fa-solid fa-shield-halved text-purple-400 text-xs"></i>
+                </div>
+                <div id="integrityDisplay" class="text-base sm:text-lg font-semibold text-white mt-1 font-mono">
+                    Verifying...
+                </div>
+                <div class="text-[11px] text-purple-400 font-mono mt-0.5">SHA-256 Validated</div>
+            </div>
+        </div>
+
+        <!-- MAIN PROGRESS & STATUS HERO -->
+        <section class="bg-tech-panel/90 border border-tech-border rounded-2xl p-5 sm:p-6 relative overflow-hidden backdrop-blur-md shadow-2xl">
+            <!-- Animated decorative circuit bar line -->
+            <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span id="liveStatusBadge" class="px-2.5 py-1 rounded text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider inline-flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                            INSTALLING APIS & SYSTEM COMPONENTS
+                        </span>
+                        <span id="etaBadge" class="text-xs font-mono text-slate-400">ETA: ~90s</span>
+                    </div>
+                    <h2 id="installationHeadline" class="text-lg sm:text-xl font-bold text-white mt-2">
+                        Mounting BLW Core API Services & Controller Drivers...
+                    </h2>
+                </div>
+
+                <!-- Percent Display -->
+                <div class="flex items-baseline gap-1 font-mono">
+                    <span id="percentageNumber" class="text-4xl sm:text-5xl font-extrabold text-cyan-400 tracking-tight">0</span>
+                    <span class="text-xl sm:text-2xl font-bold text-cyan-600">%</span>
+                </div>
+            </div>
+
+            <!-- Master Progress Bar -->
+            <div class="w-full bg-slate-900/90 h-4 rounded-full p-0.5 border border-slate-700/60 overflow-hidden relative shadow-inner">
+                <div id="masterProgressBar" class="h-full rounded-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-teal-300 transition-all duration-300 ease-out relative" style="width: 2%;">
+                    <!-- High-tech light glow head -->
+                    <div class="absolute right-0 top-0 bottom-0 w-3 bg-white blur-[2px] opacity-90 rounded-full"></div>
+                </div>
+            </div>
+
+            <!-- Progress milestones labels -->
+            <div class="flex justify-between text-[11px] font-mono text-slate-400 mt-2.5 px-1">
+                <span>0% Handshake</span>
+                <span class="hidden sm:inline">Checkpoint 1 (API Synced ~1m)</span>
+                <span class="hidden sm:inline">Checkpoint 2 (Config)</span>
+                <span>100% Board 1 Deployed</span>
+            </div>
+        </section>
+
+        <!-- CHECKPOINTS SECTION & SYSTEM VISUALIZER -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- CHECKPOINT STEPPERS (Left 2 columns on lg) -->
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold tracking-wider font-mono uppercase text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-cyan-400"></i>
+                        Verification Checkpoint Pipeline
+                    </h3>
+                    <span class="text-xs font-mono text-slate-500">Auto-transition enabled</span>
+                </div>
+
+                <!-- CHECKPOINT 1 -->
+                <div id="cardCp1" class="border border-cyan-500/50 bg-slate-900/70 rounded-xl p-4 sm:p-5 relative transition-all duration-500">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3.5">
+                            <div id="cp1IconContainer" class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0">
+                                <i id="cp1Icon" class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Checkpoint 1</span>
+                                    <span id="cp1Badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700">
+                                        RUNNING (~1 min milestone)
+                                    </span>
+                                </div>
+                                <h4 class="text-sm sm:text-base font-semibold text-white mt-0.5">
+                                    API Gateway Installation & Protocol Handshake
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Deploying BLW microservice routes, configuring reverse proxy endpoints, verifying SSL handshakes and establishing websocket channels.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right font-mono text-xs hidden sm:block shrink-0">
+                            <span id="cp1Countdown" class="text-yellow-400 font-semibold text-sm block">00:59</span>
+                            <span class="text-slate-500 text-[10px]">TIME TO SYNC</span>
+                        </div>
+                    </div>
+
+                    <!-- Mini progress line for CP1 -->
+                    <div class="mt-3.5 w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                        <div id="cp1ProgressBar" class="h-full bg-cyan-400 transition-all duration-200" style="width: 3%;"></div>
+                    </div>
+                </div>
+
+                <!-- CHECKPOINT 2 -->
+                <div id="cardCp2" class="border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500 opacity-75">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3.5">
+                            <div id="cp2IconContainer" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-500 flex items-center justify-center shrink-0">
+                                <i id="cp2Icon" class="fa-solid fa-lock text-base"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Checkpoint 2</span>
+                                    <span id="cp2Badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                                        QUEUED (Awaiting Checkpoint 1)
+                                    </span>
+                                </div>
+                                <h4 class="text-sm sm:text-base font-semibold text-slate-300 mt-0.5">
+                                    Subsystem Configuration & Driver Linking
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Injecting hardware firmware headers, linking CAN-bus / RS-485 device tree overlays, and allocating DMA buffers for Board 1.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right font-mono text-xs hidden sm:block shrink-0">
+                            <span id="cp2StatusNote" class="text-slate-500">PENDING</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3.5 w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                        <div id="cp2ProgressBar" class="h-full bg-teal-400 transition-all duration-200" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <!-- CHECKPOINT 3 -->
+                <div id="cardCp3" class="border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500 opacity-75">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3.5">
+                            <div id="cp3IconContainer" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-500 flex items-center justify-center shrink-0">
+                                <i id="cp3Icon" class="fa-solid fa-lock text-base"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Checkpoint 3</span>
+                                    <span id="cp3Badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                                        QUEUED
+                                    </span>
+                                </div>
+                                <h4 class="text-sm sm:text-base font-semibold text-slate-300 mt-0.5">
+                                    Board 1 Controller Verification & Integrity Check
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">
+                                    Executing low-level board diagnostics, GPIO loopback check, hardware watchdog registration, and flash memory verification.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right font-mono text-xs hidden sm:block shrink-0">
+                            <span id="cp3StatusNote" class="text-slate-500">PENDING</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-3.5 w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                        <div id="cp3ProgressBar" class="h-full bg-emerald-400 transition-all duration-200" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HARDWARE TELEMETRY & BOARD STATUS (Right column on lg) -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-semibold tracking-wider font-mono uppercase text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-diagram-project text-teal-400"></i>
+                        Board 1 Telemetry Link
+                    </h3>
+                    <span id="boardLiveLed" class="flex items-center gap-1.5 text-xs font-mono text-amber-400">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        PROVISIONING
+                    </span>
+                </div>
+
+                <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-4 sm:p-5 space-y-4">
+                    <!-- Board Vector Visualizer -->
+                    <div class="relative bg-slate-950/80 rounded-lg p-3 border border-slate-800/80 flex flex-col items-center justify-center text-center overflow-hidden">
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                        
+                        <div class="relative z-10 w-full flex items-center justify-between px-2 text-xs font-mono text-slate-400 border-b border-slate-800/60 pb-2 mb-3">
+                            <span class="flex items-center gap-1 text-slate-300">
+                                <i class="fa-solid fa-server text-cyan-400"></i> PCB: BLW-B1-09
+                            </span>
+                            <span class="text-[10px] text-cyan-400 font-bold" id="boardStatusBadge">BOOTING</span>
+                        </div>
+
+                        <!-- Board SVG Representation -->
+                        <div class="relative my-2 w-36 h-36 flex items-center justify-center">
+                            <div class="absolute inset-0 rounded-xl border-2 border-dashed border-cyan-500/40 animate-[spin_40s_linear_infinite]"></div>
+                            <div class="w-28 h-28 bg-slate-900 border border-cyan-500/50 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col items-center justify-center p-2 relative">
+                                <div class="w-12 h-12 rounded bg-cyan-950 border border-cyan-400 flex items-center justify-center text-cyan-300">
+                                    <i id="chipIcon" class="fa-solid fa-microchip text-2xl animate-pulse"></i>
+                                </div>
+                                <span class="text-[10px] font-mono text-slate-200 mt-2 font-bold tracking-widest">BOARD 1</span>
+                                <div class="flex gap-1 mt-1">
+                                    <span id="pinLed1" class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+                                    <span id="pinLed2" class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                    <span id="pinLed3" class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="text-[11px] font-mono text-slate-400 mt-1" id="boardNoticeText">
+                            Syncing registers via SPI/I2C bridge...
+                        </p>
+                    </div>
+
+                    <!-- Micro-metrics -->
+                    <div class="space-y-2.5 font-mono text-xs">
+                        <div class="flex justify-between items-center text-slate-400">
+                            <span>API Gateway Sync</span>
+                            <span id="metricApi" class="text-cyan-400 font-medium">In Progress</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-1">
+                            <div id="metricApiBar" class="bg-cyan-400 h-full rounded-full transition-all duration-300" style="width: 15%"></div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400 pt-1">
+                            <span>Subsystem Services</span>
+                            <span id="metricDrivers" class="text-slate-500 font-medium">Waiting</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-1">
+                            <div id="metricDriversBar" class="bg-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-slate-400 pt-1">
+                            <span>Controller Firmware</span>
+                            <span id="metricBoard" class="text-slate-500 font-medium">Locked</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-1">
+                            <div id="metricBoardBar" class="bg-emerald-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REAL-TIME CONSOLE & TERMINAL LOGS -->
+        <section class="bg-tech-panel/90 border border-tech-border rounded-xl overflow-hidden shadow-2xl relative">
+            <div class="bg-slate-950 px-4 py-2.5 border-b border-tech-border flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="flex gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+                    </div>
+                    <span class="text-xs font-mono font-medium text-slate-400 ml-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-terminal text-cyan-400 text-[11px]"></i>
+                        console.blw.daemon &mdash; /var/log/blw/installation.log
+                    </span>
+                </div>
+                <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
+                    <button onclick="clearConsole()" class="hover:text-slate-200 transition text-[11px]">
+                        <i class="fa-solid fa-eraser mr-1"></i>Clear
+                    </button>
+                    <span class="text-slate-700">|</span>
+                    <span class="text-emerald-400 flex items-center gap-1 text-[11px]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        STREAM LIVE
+                    </span>
+                </div>
+            </div>
+
+            <div id="terminalContainer" class="p-4 font-mono text-xs sm:text-[13px] h-60 sm:h-64 overflow-y-auto space-y-1 bg-tech-darkest/95 text-slate-300">
+                <!-- Dynamic Logs Appended Here -->
+            </div>
+        </section>
+
+        <!-- FOOTER BAR -->
+        <footer class="text-center sm:flex sm:justify-between sm:items-center text-xs font-mono text-slate-500 py-3 border-t border-tech-border/60">
+            <div>BLW Telemetry Core &bull; Installation Node #01</div>
+            <div class="mt-2 sm:mt-0 flex items-center justify-center gap-4">
+                <span>Memory: <span class="text-slate-300">64.2 MB</span></span>
+                <span>Latency: <span class="text-cyan-400 font-semibold">1.4ms</span></span>
+                <span>Security: <span class="text-emerald-400">TLS 1.3 / mTLS</span></span>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- FINAL COMPLETION MODAL / FULL-SCREEN NOTIFICATION -->
+    <div id="finalModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 hidden opacity-0 transition-opacity duration-500">
+        <div class="bg-tech-panel border-2 border-emerald-500/60 rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-[0_0_50px_rgba(16,185,129,0.3)] relative overflow-hidden transform scale-95 transition-transform duration-300" id="modalBox">
+            
+            <!-- Glow background decor -->
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto rounded-2xl bg-emerald-950/80 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)] mb-4">
+                    <i class="fa-solid fa-check-double text-3xl"></i>
+                </div>
+
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    ALL 3 CHECKPOINTS VERIFIED
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    Installation Of Board 1 Is Done
+                </h3>
+
+                <!-- Highlight requested message -->
+                <div class="mt-4 p-4 rounded-xl bg-slate-950/70 border border-emerald-500/30 text-left">
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-0.5 text-base"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-200">
+                                Board 1 is Successfully Installed!
+                            </p>
+                            <p class="text-xs text-amber-300 font-mono mt-1">
+                                Notice: It will take some time for the board to go fully Live across the regional network cluster.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telemetry Summary Points -->
+                <div class="grid grid-cols-3 gap-2 my-5 text-left font-mono text-xs">
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <div class="text-slate-500 text-[10px]">CHECKPOINT 1</div>
+                        <div class="text-emerald-400 font-bold mt-0.5">API: PASS</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <div class="text-slate-500 text-[10px]">CHECKPOINT 2</div>
+                        <div class="text-emerald-400 font-bold mt-0.5">DRIVERS: OK</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                        <div class="text-slate-500 text-[10px]">CHECKPOINT 3</div>
+                        <div class="text-emerald-400 font-bold mt-0.5">BOARD 1: READY</div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                    <button onclick="dismissModal()" class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold font-mono text-xs tracking-wider transition shadow-lg shadow-emerald-500/20 uppercase">
+                        Acknowledge & Monitor Live
+                    </button>
+                    <button onclick="resetInstallation()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition border border-slate-700">
+                        Run New Deployment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING LIVE BANNER (Appears after completion) -->
+    <div id="liveBanner" class="fixed bottom-4 left-4 right-4 max-w-4xl mx-auto bg-slate-900/95 border-2 border-emerald-500 text-white p-4 rounded-xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3 transform translate-y-32 transition-transform duration-500 z-40 backdrop-blur-md hidden">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                <i class="fa-solid fa-circle-check text-xl"></i>
+            </div>
+            <div>
+                <div class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                    Status: Installation Of Board 1 Is Done
+                </div>
+                <div class="text-xs text-slate-300 mt-0.5">
+                    Synchronizing network sockets &mdash; <span class="text-amber-400 font-mono">It will take some time for the service to go completely Live.</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="openModalAgain()" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-mono hover:bg-emerald-500/30 transition">
+                View Report
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ========================================================
+           STATE & CONFIGURATION
+           ======================================================== */
+        // Checkpoint 1 target: 60 real seconds (60,000ms)
+        // Total pipeline ~ 85-90 seconds in standard mode.
+        const CONFIG = {
+            cp1DurationMs: 60000, // Exactly 1 minute for Checkpoint 1
+            cp2DurationMs: 14000, // ~14s for Checkpoint 2
+            cp3DurationMs: 14000, // ~14s for Checkpoint 3
+            updateIntervalMs: 100
+        };
+
+        let state = {
+            elapsedMs: 0,
+            speedMultiplier: 1, // Can be 1x or 10x for fast testing
+            isRunning: true,
+            isAudioEnabled: true,
+            currentCheckpoint: 1, // 1, 2, 3, or 'COMPLETED'
+            progressPercent: 0,
+            hasPlayedCp1Beep: false,
+            hasPlayedCp2Beep: false,
+            hasPlayedCp3Beep: false
+        };
+
+        let timerInterval = null;
+        let logInterval = null;
+
+        /* ========================================================
+           WEB AUDIO SYNTHESIZER (No external audio files needed)
+           ======================================================== */
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!state.isAudioEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                const now = ctx.currentTime;
+
+                if (type === 'tick') {
+                    // Soft high-tech telemetry pulse
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, now);
+                    gain.gain.setValueAtTime(0.015, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'checkpoint') {
+                    // Two-tone success chime
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'finish') {
+                    // Glorious major triad chime
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const noteOsc = ctx.createOscillator();
+                        const noteGain = ctx.createGain();
+                        noteOsc.connect(noteGain);
+                        noteGain.connect(ctx.destination);
+                        
+                        noteOsc.type = 'sine';
+                        noteOsc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                        noteGain.gain.setValueAtTime(0.09, now + idx * 0.12);
+                        noteGain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.12 + 0.4);
+                        noteOsc.start(now + idx * 0.12);
+                        noteOsc.stop(now + idx * 0.12 + 0.45);
+                    });
+                }
+            } catch (e) {
+                console.warn('Audio synthesis note: ', e);
+            }
+        }
+
+        function toggleAudio() {
+            state.isAudioEnabled = !state.isAudioEnabled;
+            const icon = document.getElementById('soundIcon');
+            const label = document.getElementById('soundLabel');
+            if (state.isAudioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-brand-400';
+                label.textContent = 'Audio: ON';
+                getAudioContext(); // warm up
+                playSound('tick');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+                label.textContent = 'Audio: OFF';
+            }
+        }
+
+        function toggleSpeed() {
+            const btnLabel = document.getElementById('speedLabel');
+            const targetNote = document.getElementById('cp1TargetText');
+            if (state.speedMultiplier === 1) {
+                state.speedMultiplier = 10;
+                btnLabel.textContent = 'Mode: 10x FAST';
+                targetNote.textContent = '~00:06 (Fast)';
+                appendLog('WARN', 'Telemetry test speed set to 10x turbo mode.');
+            } else {
+                state.speedMultiplier = 1;
+                btnLabel.textContent = 'Mode: 1x (Real 60s)';
+                targetNote.textContent = '~01:00';
+                appendLog('INFO', 'Telemetry speed returned to 1.0x real-time mode.');
+            }
+            playSound('tick');
+        }
+
+        /* ========================================================
+           LOG STREAM POOL (REALISTIC INDUSTRIAL STRINGS)
+           ======================================================== */
+        const LOG_POOL_PHASE1 = [
+            "Probing local bus interface [blw-eth0 @ 192.168.1.120]...",
+            "Requesting secure token handshake from Gateway API /v2/auth...",
+            "Validating TLS 1.3 session certificate [BLW-CA-ROOT-2026]...",
+            "Establishing multiplexed HTTP/2 streaming pipeline...",
+            "Syncing API endpoints: /api/v1/telemetry, /api/v1/actuators...",
+            "Allocating thread pool: 8 workers assigned to API sync...",
+            "Synchronizing REST definitions and JSON-schema payloads...",
+            "Transmitting initial protocol nonce to gateway: 0x9AF8402B...",
+            "Received gateway response: 200 OK (Keep-Alive: 300s)...",
+            "Validating API rate limits: 10,000 req/sec headroom verified...",
+            "Mounting distributed microservice tables for Board 1...",
+            "Handshake retry counter: 0 errors detected. Signal strength: 99.4%..."
+        ];
+
+        const LOG_POOL_PHASE2 = [
+            "Initializing Subsystem kernel modules (sys_blw_core.ko)...",
+            "Configuring CAN-bus bit timing: 500 kbps sample rate 87.5%...",
+            "Binding RS-485 serial descriptors on /dev/ttyBLW0...",
+            "Writing configuration overlay to non-volatile flash partition...",
+            "Linking system interrupt handlers to IRQ 42, 43, and 45...",
+            "Subsystem memory pool initialized (DDR4 2048MB mapped)...",
+            "Calibrating analog telemetry sensors [Temp: 34.2°C, VDD: 3.31V]...",
+            "Applying security policy SELinux contexts for daemon runner..."
+        ];
+
+        const LOG_POOL_PHASE3 = [
+            "Pinging Board 1 hardware controller at physical addr 0x3C...",
+            "Board 1 acknowledge packet received in 0.82ms. Status: READY...",
+            "Performing GPIO pin loopback diagnostics [16/16 pins OK]...",
+            "Registering hardware watchdog timer (Timeout: 5000ms)...",
+            "Checksumming onboard flash: SHA-256 matches remote registry...",
+            "Testing thermal tripwire logic: Nominal...",
+            "Committing Board 1 persistent configuration block..."
+        ];
+
+        /* ========================================================
+           CORE ENGINE TICK
+           ======================================================== */
+        function startEngine() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (logInterval) clearInterval(logInterval);
+
+            // Initial logs
+            appendLog('SYSTEM', 'BLW Bootloader initialized. Beginning installation sequence...');
+            appendLog('INFO', 'Target hardware: BLW Board 1 Revision 3.');
+            appendLog('API', 'Connecting to API Gateway and beginning 60-second handshake process...');
+
+            timerInterval = setInterval(() => {
+                if (!state.isRunning) return;
+
+                // Advance time based on multiplier
+                const delta = CONFIG.updateIntervalMs * state.speedMultiplier;
+                state.elapsedMs += delta;
+
+                updateTimersAndProgress();
+            }, CONFIG.updateIntervalMs);
+
+            // Random log generation
+            logInterval = setInterval(() => {
+                if (!state.isRunning) return;
+                generateRandomLog();
+            }, 1800);
+        }
+
+        function updateTimersAndProgress() {
+            // Update Elapsed Clock Display
+            const totalSec = state.elapsedMs / 1000;
+            const mins = Math.floor(totalSec / 60);
+            const secs = Math.floor(totalSec % 60);
+            const tenths = Math.floor((totalSec % 1) * 10);
+            document.getElementById('elapsedTimerDisplay').textContent = 
+                `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${tenths}s`;
+
+            const cp1Duration = CONFIG.cp1DurationMs;
+            const cp2Duration = CONFIG.cp2DurationMs;
+            const cp3Duration = CONFIG.cp3DurationMs;
+            const totalEstimated = cp1Duration + cp2Duration + cp3Duration;
+
+            // ============================================
+            // CHECKPOINT 1 LOGIC (0 -> 60s)
+            // ============================================
+            if (state.elapsedMs < cp1Duration) {
+                state.currentCheckpoint = 1;
+                
+                // Countdown until Checkpoint 1
+                const remainingCp1 = Math.max(0, Math.ceil((cp1Duration - state.elapsedMs) / 1000));
+                const cp1M = Math.floor(remainingCp1 / 60);
+                const cp1S = remainingCp1 % 60;
+                document.getElementById('cp1Countdown').textContent = 
+                    `${String(cp1M).padStart(2, '0')}:${String(cp1S).padStart(2, '0')}`;
+
+                const cp1Ratio = Math.min(1, state.elapsedMs / cp1Duration);
+                document.getElementById('cp1ProgressBar').style.width = `${(cp1Ratio * 100).toFixed(1)}%`;
+                
+                // Overall progress goes from 0% to 55% during checkpoint 1
+                state.progressPercent = Math.min(55, Math.floor(cp1Ratio * 55));
+
+                document.getElementById('metricApi').textContent = `${Math.floor(cp1Ratio * 100)}% Synced`;
+                document.getElementById('metricApiBar').style.width = `${Math.floor(cp1Ratio * 100)}%`;
+
+                document.getElementById('telemetryPhase').textContent = "Handshaking Gateway";
+                document.getElementById('telemetrySub').textContent = `Syncing APIs (${remainingCp1}s remaining)`;
+            } 
+            // ============================================
+            // CHECKPOINT 1 SUCCEEDED -> TRANSITION TO CP2
+            // ============================================
+            else if (state.elapsedMs >= cp1Duration && state.elapsedMs < (cp1Duration + cp2Duration)) {
+                if (!state.hasPlayedCp1Beep) {
+                    markCheckpoint1Success();
+                }
+
+                state.currentCheckpoint = 2;
+                const elapsedInCp2 = state.elapsedMs - cp1Duration;
+                const cp2Ratio = Math.min(1, elapsedInCp2 / cp2Duration);
+
+                document.getElementById('cp2ProgressBar').style.width = `${(cp2Ratio * 100).toFixed(1)}%`;
+                
+                // Progress moves from 55% to 80%
+                state.progressPercent = 55 + Math.floor(cp2Ratio * 25);
+
+                document.getElementById('metricDrivers').textContent = `${Math.floor(cp2Ratio * 100)}% Configured`;
+                document.getElementById('metricDriversBar').style.width = `${Math.floor(cp2Ratio * 100)}%`;
+
+                document.getElementById('telemetryPhase').textContent = "Subsystem Config";
+                document.getElementById('telemetrySub').textContent = "Linking Hardware Drivers";
+            }
+            // ============================================
+            // CHECKPOINT 2 SUCCEEDED -> TRANSITION TO CP3
+            // ============================================
+            else if (state.elapsedMs >= (cp1Duration + cp2Duration) && state.elapsedMs < totalEstimated) {
+                if (!state.hasPlayedCp2Beep) {
+                    markCheckpoint2Success();
+                }
+
+                state.currentCheckpoint = 3;
+                const elapsedInCp3 = state.elapsedMs - (cp1Duration + cp2Duration);
+                const cp3Ratio = Math.min(1, elapsedInCp3 / cp3Duration);
+
+                document.getElementById('cp3ProgressBar').style.width = `${(cp3Ratio * 100).toFixed(1)}%`;
+                
+                // Progress moves from 80% to 99%
+                state.progressPercent = 80 + Math.floor(cp3Ratio * 19);
+
+                document.getElementById('metricBoard').textContent = `${Math.floor(cp3Ratio * 100)}% Verified`;
+                document.getElementById('metricBoardBar').style.width = `${Math.floor(cp3Ratio * 100)}%`;
+
+                document.getElementById('telemetryPhase').textContent = "Board 1 Diagnostics";
+                document.getElementById('telemetrySub').textContent = "Verifying Controller Registers";
+            }
+            // ============================================
+            // ALL CHECKPOINTS COMPLETED -> BOARD 1 DONE
+            // ============================================
+            else {
+                if (!state.hasPlayedCp3Beep) {
+                    markCheckpoint3SuccessAndFinalize();
+                }
+            }
+
+            // Sync Master Visual Bars
+            document.getElementById('percentageNumber').textContent = state.progressPercent;
+            document.getElementById('masterProgressBar').style.width = `${state.progressPercent}%`;
+        }
+
+        /* ========================================================
+           CHECKPOINT EVENT HANDLERS
+           ======================================================== */
+        function markCheckpoint1Success() {
+            state.hasPlayedCp1Beep = true;
+            playSound('checkpoint');
+
+            // UI updates for CP1
+            const card = document.getElementById('cardCp1');
+            card.classList.remove('border-cyan-500/50');
+            card.classList.add('border-emerald-500/60', 'bg-emerald-950/20');
+
+            const iconContainer = document.getElementById('cp1IconContainer');
+            iconContainer.className = 'w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center shrink-0';
+            iconContainer.innerHTML = '<i class="fa-solid fa-check text-lg"></i>';
+
+            const badge = document.getElementById('cp1Badge');
+            badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500 font-bold';
+            badge.textContent = 'CHECKPOINT 1 SUCCEEDED';
+
+            document.getElementById('cp1Countdown').textContent = 'DONE (60s)';
+            document.getElementById('cp1Countdown').className = 'text-emerald-400 font-bold text-sm block';
+            document.getElementById('cp1ProgressBar').style.width = '100%';
+            document.getElementById('cp1ProgressBar').className = 'h-full bg-emerald-400';
+
+            // CP2 becomes active
+            const card2 = document.getElementById('cardCp2');
+            card2.classList.remove('opacity-75', 'border-slate-800');
+            card2.classList.add('border-cyan-500/50', 'bg-slate-900/80');
+
+            const icon2 = document.getElementById('cp2IconContainer');
+            icon2.className = 'w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0';
+            icon2.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
+
+            const badge2 = document.getElementById('cp2Badge');
+            badge2.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700';
+            badge2.textContent = 'RUNNING';
+
+            document.getElementById('installationHeadline').textContent = 'Checkpoint 1 Succeeded! Configuring Subsystem Drivers...';
+            document.getElementById('liveStatusBadge').innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                CHECKPOINT 1 SUCCESS: APIS INSTALLED & HANDSHAKED
+            `;
+            document.getElementById('liveStatusBadge').className = 'px-2.5 py-1 rounded text-xs font-mono font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-wider inline-flex items-center gap-1.5';
+
+            appendLog('SUCCESS', '>>> CHECKPOINT 1 SUCCEEDED: All BLW Core APIs installed & verified.');
+            appendLog('SYSTEM', 'Transitioning bus control to Checkpoint 2: Subsystem Configuration...');
+        }
+
+        function markCheckpoint2Success() {
+            state.hasPlayedCp2Beep = true;
+            playSound('checkpoint');
+
+            // UI updates for CP2
+            const card2 = document.getElementById('cardCp2');
+            card2.classList.remove('border-cyan-500/50');
+            card2.classList.add('border-emerald-500/60', 'bg-emerald-950/20');
+
+            const iconContainer = document.getElementById('cp2IconContainer');
+            iconContainer.className = 'w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center shrink-0';
+            iconContainer.innerHTML = '<i class="fa-solid fa-check text-lg"></i>';
+
+            const badge = document.getElementById('cp2Badge');
+            badge.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500 font-bold';
+            badge.textContent = 'CHECKPOINT 2 SUCCEEDED';
+
+            document.getElementById('cp2StatusNote').textContent = 'CONFIGURED';
+            document.getElementById('cp2StatusNote').className = 'text-emerald-400 font-bold';
+            document.getElementById('cp2ProgressBar').style.width = '100%';
+            document.getElementById('cp2ProgressBar').className = 'h-full bg-emerald-400';
+
+            // CP3 becomes active
+            const card3 = document.getElementById('cardCp3');
+            card3.classList.remove('opacity-75', 'border-slate-800');
+            card3.classList.add('border-cyan-500/50', 'bg-slate-900/80');
+
+            const icon3 = document.getElementById('cp3IconContainer');
+            icon3.className = 'w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0';
+            icon3.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
+
+            const badge3 = document.getElementById('cp3Badge');
+            badge3.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700';
+            badge3.textContent = 'RUNNING';
+
+            document.getElementById('installationHeadline').textContent = 'Checkpoint 2 Succeeded! Verifying Board 1 Controller...';
+
+            appendLog('SUCCESS', '>>> CHECKPOINT 2 SUCCEEDED: Subsystem configuration and driver linking complete.');
+            appendLog('SYSTEM', 'Initiating Checkpoint 3: Board 1 controller verification and register test...');
+        }
+
+        function markCheckpoint3SuccessAndFinalize() {
+            state.hasPlayedCp3Beep = true;
+            state.progressPercent = 100;
+            state.isRunning = false;
+
+            clearInterval(timerInterval);
+            clearInterval(logInterval);
+
+            playSound('finish');
+
+            // CP3 Success UI
+            const card3 = document.getElementById('cardCp3');
+            card3.classList.remove('border-cyan-500/50');
+            card3.classList.add('border-emerald-500/60', 'bg-emerald-950/20');
+
+            const iconContainer = document.getElementById('cp3IconContainer');
+            iconContainer.className = 'w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 flex items-center justify-center shrink-0';
+            iconContainer.innerHTML = '<i class="fa-solid fa-check text-lg"></i>';
+
+            const badge3 = document.getElementById('cp3Badge');
+            badge3.className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500 font-bold';
+            badge3.textContent = 'CHECKPOINT 3 SUCCEEDED';
+
+            document.getElementById('cp3StatusNote').textContent = 'VERIFIED';
+            document.getElementById('cp3StatusNote').className = 'text-emerald-400 font-bold';
+            document.getElementById('cp3ProgressBar').style.width = '100%';
+            document.getElementById('cp3ProgressBar').className = 'h-full bg-emerald-400';
+
+            // Master Bars to 100%
+            document.getElementById('percentageNumber').textContent = '100';
+            document.getElementById('masterProgressBar').style.width = '100%';
+
+            // Telemetry Cards
+            document.getElementById('telemetryPhase').textContent = "Installation Of Board 1 Is Done";
+            document.getElementById('telemetryPhase').className = "text-base sm:text-lg font-semibold text-emerald-400 mt-1 font-mono truncate";
+            document.getElementById('telemetrySub').textContent = "Live propagation pending...";
+            document.getElementById('integrityDisplay').textContent = "100% HEALTHY";
+            document.getElementById('integrityDisplay').className = "text-base sm:text-lg font-semibold text-emerald-400 mt-1 font-mono";
+
+            // Board Status Box
+            document.getElementById('boardLiveLed').className = "flex items-center gap-1.5 text-xs font-mono text-emerald-400";
+            document.getElementById('boardLiveLed').innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> PROVISIONED';
+            document.getElementById('boardStatusBadge').textContent = 'ONLINE / PENDING LIVE';
+            document.getElementById('boardStatusBadge').className = 'text-[10px] text-emerald-400 font-bold';
+            document.getElementById('boardNoticeText').textContent = 'Board 1 installed successfully. Sockets warming up...';
+            document.getElementById('boardNoticeText').className = 'text-[11px] font-mono text-emerald-300 mt-1';
+            
+            // LED pins on Board Visualizer
+            document.getElementById('pinLed1').className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+            document.getElementById('pinLed2').className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+            document.getElementById('pinLed3').className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+
+            document.getElementById('metricBoard').textContent = '100% Verified';
+            document.getElementById('metricBoardBar').style.width = '100%';
+
+            // Headlines
+            document.getElementById('installationHeadline').textContent = 'Installation Of Board 1 Is Done!';
+            document.getElementById('liveStatusBadge').innerHTML = `
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                INSTALLATION OF BOARD 1 IS DONE
+            `;
+            document.getElementById('liveStatusBadge').className = 'px-3 py-1 rounded text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500 uppercase tracking-wider inline-flex items-center gap-2';
+            document.getElementById('etaBadge').textContent = 'Completed';
+
+            appendLog('SUCCESS', '****************************************************************');
+            appendLog('SUCCESS', '>>> CHECKPOINT 3 SUCCEEDED: Board 1 Controller Verification passed.');
+            appendLog('SUCCESS', '>>> INSTALLATION OF BOARD 1 IS DONE!');
+            appendLog('WARN', 'Notice: It will take some time for Board 1 services to broadcast Live.');
+            appendLog('SUCCESS', '****************************************************************');
+
+            // Show Final Modal
+            setTimeout(() => {
+                showModal();
+            }, 600);
+
+            // Also slide in bottom floating notification
+            const banner = document.getElementById('liveBanner');
+            banner.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.remove('translate-y-32');
+            }, 100);
+        }
+
+        /* ========================================================
+           CONSOLE LOG ENGINE
+           ======================================================== */
+        function appendLog(level, message) {
+            const container = document.getElementById('terminalContainer');
+            if (!container) return;
+
+            const timeStr = new Date().toTimeString().split(' ')[0] + '.' + String(Date.now() % 1000).padStart(3, '0');
+            const row = document.createElement('div');
+            row.className = 'flex items-start gap-2 leading-relaxed';
+
+            let badgeColor = 'text-slate-400';
+            let msgColor = 'text-slate-300';
+
+            if (level === 'API') {
+                badgeColor = 'text-cyan-400 font-semibold';
+                msgColor = 'text-cyan-200';
+            } else if (level === 'SUCCESS') {
+                badgeColor = 'text-emerald-400 font-bold';
+                msgColor = 'text-emerald-300 font-medium';
+            } else if (level === 'WARN') {
+                badgeColor = 'text-amber-400 font-semibold';
+                msgColor = 'text-amber-200';
+            } else if (level === 'SYSTEM') {
+                badgeColor = 'text-purple-400 font-semibold';
+                msgColor = 'text-slate-200';
+            }
+
+            row.innerHTML = `
+                <span class="text-slate-600 select-none">[${timeStr}]</span>
+                <span class="${badgeColor}">[${level}]</span>
+                <span class="${msgColor}">${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function generateRandomLog() {
+            if (state.currentCheckpoint === 1) {
+                const msg = LOG_POOL_PHASE1[Math.floor(Math.random() * LOG_POOL_PHASE1.length)];
+                appendLog('API', msg);
+                playSound('tick');
+            } else if (state.currentCheckpoint === 2) {
+                const msg = LOG_POOL_PHASE2[Math.floor(Math.random() * LOG_POOL_PHASE2.length)];
+                appendLog('SYSTEM', msg);
+                playSound('tick');
+            } else if (state.currentCheckpoint === 3) {
+                const msg = LOG_POOL_PHASE3[Math.floor(Math.random() * LOG_POOL_PHASE3.length)];
+                appendLog('BOARD', msg);
+                playSound('tick');
+            }
+        }
+
+        function clearConsole() {
+            const container = document.getElementById('terminalContainer');
+            container.innerHTML = '';
+            appendLog('SYSTEM', 'Console buffer cleared by operator.');
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        /* ========================================================
+           MODAL CONTROLS
+           ======================================================== */
+        function showModal() {
+            const modal = document.getElementById('finalModal');
+            const box = document.getElementById('modalBox');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+                box.classList.add('scale-100');
+            }, 10);
+        }
+
+        function dismissModal() {
+            const modal = document.getElementById('finalModal');
+            const box = document.getElementById('modalBox');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 400);
+        }
+
+        function openModalAgain() {
+            showModal();
+        }
+
+        /* ========================================================
+           RESET & RE-RUN PIPELINE
+           ======================================================== */
+        function resetInstallation() {
+            dismissModal();
+            const banner = document.getElementById('liveBanner');
+            banner.classList.add('translate-y-32');
+            setTimeout(() => banner.classList.add('hidden'), 400);
+
+            state.elapsedMs = 0;
+            state.isRunning = true;
+            state.currentCheckpoint = 1;
+            state.progressPercent = 0;
+            state.hasPlayedCp1Beep = false;
+            state.hasPlayedCp2Beep = false;
+            state.hasPlayedCp3Beep = false;
+
+            // Reset CP1
+            const card1 = document.getElementById('cardCp1');
+            card1.className = 'border border-cyan-500/50 bg-slate-900/70 rounded-xl p-4 sm:p-5 relative transition-all duration-500';
+            document.getElementById('cp1IconContainer').className = 'w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0';
+            document.getElementById('cp1IconContainer').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
+            document.getElementById('cp1Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700';
+            document.getElementById('cp1Badge').textContent = 'RUNNING (~1 min milestone)';
+            document.getElementById('cp1Countdown').textContent = '00:59';
+            document.getElementById('cp1Countdown').className = 'text-yellow-400 font-semibold text-sm block';
+            document.getElementById('cp1ProgressBar').style.width = '2%';
+            document.getElementById('cp1ProgressBar').className = 'h-full bg-cyan-400 transition-all duration-200';
+
+            // Reset CP2
+            const card2 = document.getElementById('cardCp2');
+            card2.className = 'border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500 opacity-75';
+            document.getElementById('cp2IconContainer').className = 'w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-500 flex items-center justify-center shrink-0';
+            document.getElementById('cp2IconContainer').innerHTML = '<i class="fa-solid fa-lock text-base"></i>';
+            document.getElementById('cp2Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+            document.getElementById('cp2Badge').textContent = 'QUEUED (Awaiting Checkpoint 1)';
+            document.getElementById('cp2StatusNote').textContent = 'PENDING';
+            document.getElementById('cp2StatusNote').className = 'text-slate-500';
+            document.getElementById('cp2ProgressBar').style.width = '0%';
+            document.getElementById('cp2ProgressBar').className = 'h-full bg-teal-400 transition-all duration-200';
+
+            // Reset CP3
+            const card3 = document.getElementById('cardCp3');
+            card3.className = 'border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500 opacity-75';
+            document.getElementById('cp3IconContainer').className = 'w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-500 flex items-center justify-center shrink-0';
+            document.getElementById('cp3IconContainer').innerHTML = '<i class="fa-solid fa-lock text-base"></i>';
+            document.getElementById('cp3Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+            document.getElementById('cp3Badge').textContent = 'QUEUED';
+            document.getElementById('cp3StatusNote').textContent = 'PENDING';
+            document.getElementById('cp3StatusNote').className = 'text-slate-500';
+            document.getElementById('cp3ProgressBar').style.width = '0%';
+            document.getElementById('cp3ProgressBar').className = 'h-full bg-emerald-400 transition-all duration-200';
+
+            // Reset Header & Global Metrics
+            document.getElementById('installationHeadline').textContent = 'Mounting BLW Core API Services & Controller Drivers...';
+            document.getElementById('liveStatusBadge').className = 'px-2.5 py-1 rounded text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider inline-flex items-center gap-1.5';
+            document.getElementById('liveStatusBadge').innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                INSTALLING APIS & SYSTEM COMPONENTS
+            `;
+            document.getElementById('etaBadge').textContent = 'ETA: ~90s';
+            document.getElementById('percentageNumber').textContent = '0';
+            document.getElementById('masterProgressBar').style.width = '2%';
+            document.getElementById('telemetryPhase').textContent = "Connecting Endpoints";
+            document.getElementById('telemetryPhase').className = "text-base sm:text-lg font-semibold text-white mt-1 font-mono truncate";
+            document.getElementById('telemetrySub').textContent = "Port 8080: Handshaking";
+            document.getElementById('integrityDisplay').textContent = "Verifying...";
+            document.getElementById('integrityDisplay').className = "text-base sm:text-lg font-semibold text-white mt-1 font-mono";
+
+            // Reset Board visualizer
+            document.getElementById('boardLiveLed').className = "flex items-center gap-1.5 text-xs font-mono text-amber-400";
+            document.getElementById('boardLiveLed').innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> PROVISIONING';
+            document.getElementById('boardStatusBadge').textContent = 'BOOTING';
+            document.getElementById('boardStatusBadge').className = 'text-[10px] text-cyan-400 font-bold';
+            document.getElementById('boardNoticeText').textContent = 'Syncing registers via SPI/I2C bridge...';
+            document.getElementById('boardNoticeText').className = 'text-[11px] font-mono text-slate-400 mt-1';
+            document.getElementById('pinLed1').className = 'w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping';
+            document.getElementById('pinLed2').className = 'w-1.5 h-1.5 rounded-full bg-yellow-400';
+            document.getElementById('pinLed3').className = 'w-1.5 h-1.5 rounded-full bg-slate-700';
+
+            document.getElementById('metricApi').textContent = 'In Progress';
+            document.getElementById('metricApiBar').style.width = '10%';
+            document.getElementById('metricDrivers').textContent = 'Waiting';
+            document.getElementById('metricDriversBar').style.width = '0%';
+            document.getElementById('metricBoard').textContent = 'Locked';
+            document.getElementById('metricBoardBar').style.width = '0%';
+
+            clearConsole();
+            startEngine();
+        }
+
+        /* ========================================================
+           STARTUP
+           ======================================================== */
+        window.onload = function() {
+            startEngine();
+        };
+    </script>
+</body>
+</html>
