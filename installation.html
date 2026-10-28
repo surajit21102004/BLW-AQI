@@ -96,6 +96,74 @@
     <!-- Top Glow / Vignette Accent -->
     <div class="fixed top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-5xl h-36 bg-cyan-500/10 blur-[120px] pointer-events-none -z-10"></div>
 
+    <!-- PRE-LAUNCH INITIALIZATION MODAL (ACTIVE BEFORE START) -->
+    <div id="preLaunchModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 transition-all duration-500">
+        <div class="bg-tech-panel border-2 border-brand-500/70 rounded-2xl max-w-xl w-full p-6 sm:p-8 shadow-[0_0_60px_rgba(6,182,212,0.35)] relative overflow-hidden">
+            <!-- Glow background decor -->
+            <div class="absolute -right-16 -top-16 w-52 h-52 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-2xl bg-cyan-950/90 border-2 border-cyan-400 flex items-center justify-center text-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.4)] mb-4 animate-pulseGlow">
+                    <i class="fa-solid fa-power-off text-3xl sm:text-4xl text-cyan-400"></i>
+                </div>
+
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                    SYSTEM STANDBY &bull; AWAITING OPERATOR TRIGGER
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    BLW Board 1 Installation Program
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-400 mt-2">
+                    Target Hardware: <span class="text-cyan-400 font-mono font-semibold">ARM64 Board 1 (Rev-3)</span>. System bus is ready for deployment.
+                </p>
+
+                <!-- Pre-flight checklist -->
+                <div class="mt-5 p-4 rounded-xl bg-slate-950/80 border border-tech-border text-left space-y-2.5 font-mono text-xs">
+                    <div class="text-[11px] uppercase tracking-wider text-slate-500 font-bold mb-1">
+                        Pre-Installation System Checks:
+                    </div>
+                    <div class="flex items-center justify-between text-slate-300">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i> Primary Power Rail (3.3V / 12V)
+                        </span>
+                        <span class="text-emerald-400 font-semibold">STABLE</span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-300">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i> CAN-Bus / SPI Interface Loop
+                        </span>
+                        <span class="text-emerald-400 font-semibold">STANDBY</span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-300">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i> API Gateway Reverse Proxy (Port 8080)
+                        </span>
+                        <span class="text-cyan-400 font-semibold">LISTENING</span>
+                    </div>
+                    <div class="flex items-center justify-between text-slate-300">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-yellow-400 text-xs"></i> Checkpoint 1 Target Duration
+                        </span>
+                        <span class="text-yellow-400 font-semibold">01:00 MIN</span>
+                    </div>
+                </div>
+
+                <!-- Launch Button -->
+                <div class="mt-6 flex flex-col gap-3">
+                    <button onclick="startInstallationProgram()" class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-extrabold font-mono text-sm tracking-wider uppercase transition shadow-[0_0_30px_rgba(6,182,212,0.5)] flex items-center justify-center gap-3 transform hover:scale-[1.02] active:scale-[0.98]">
+                        <i class="fa-solid fa-play text-base"></i>
+                        <span>Initialize & Start Board Installation</span>
+                    </button>
+                    <p class="text-[11px] font-mono text-slate-500">
+                        Clicking starts the 60s Checkpoint 1 handshake, driver links, and board verification.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN WRAPPER -->
     <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-6 flex-grow">
 
@@ -108,9 +176,9 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="text-xs tracking-widest font-mono text-cyan-400 font-bold uppercase bg-cyan-950/70 border border-cyan-800/80 px-2 py-0.5 rounded">BLW-OS v4.12</span>
-                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                            BUS ACTIVE
+                        <span id="systemStatusPill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                            STANDBY
                         </span>
                     </div>
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
@@ -121,6 +189,12 @@
 
             <!-- Controller Controls & Tools -->
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto justify-end">
+                <!-- Start/Trigger Button in Header (always accessible) -->
+                <button id="headerStartBtn" onclick="startInstallationProgram()" class="px-3 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold flex items-center gap-2 transition shadow-md">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Start Installation</span>
+                </button>
+
                 <!-- Sound Toggle -->
                 <button id="soundToggleBtn" onclick="toggleAudio()" class="px-3 py-2 rounded-lg bg-tech-panel border border-tech-border text-slate-300 hover:text-white hover:border-slate-500 text-xs font-mono flex items-center gap-2 transition">
                     <i id="soundIcon" class="fa-solid fa-volume-high text-brand-400"></i>
@@ -149,9 +223,9 @@
                     <i class="fa-solid fa-server text-cyan-400 text-xs"></i>
                 </div>
                 <div id="telemetryPhase" class="text-base sm:text-lg font-semibold text-white mt-1 font-mono truncate">
-                    Connecting Endpoints
+                    Standby Mode
                 </div>
-                <div class="text-[11px] text-cyan-400/80 font-mono mt-0.5" id="telemetrySub">Port 8080: Handshaking</div>
+                <div class="text-[11px] text-amber-400/80 font-mono mt-0.5" id="telemetrySub">Press 'Start' to begin</div>
             </div>
 
             <div class="bg-tech-panel/80 border border-tech-border rounded-xl p-3.5 backdrop-blur-sm">
@@ -184,9 +258,9 @@
                     <i class="fa-solid fa-shield-halved text-purple-400 text-xs"></i>
                 </div>
                 <div id="integrityDisplay" class="text-base sm:text-lg font-semibold text-white mt-1 font-mono">
-                    Verifying...
+                    Standby
                 </div>
-                <div class="text-[11px] text-purple-400 font-mono mt-0.5">SHA-256 Validated</div>
+                <div class="text-[11px] text-purple-400 font-mono mt-0.5">SHA-256 Armed</div>
             </div>
         </div>
 
@@ -198,14 +272,14 @@
             <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-4">
                 <div>
                     <div class="flex items-center gap-2">
-                        <span id="liveStatusBadge" class="px-2.5 py-1 rounded text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider inline-flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                            INSTALLING APIS & SYSTEM COMPONENTS
+                        <span id="liveStatusBadge" class="px-2.5 py-1 rounded text-xs font-mono font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider inline-flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                            SYSTEM STANDBY &bull; CLICK 'START INSTALLATION'
                         </span>
-                        <span id="etaBadge" class="text-xs font-mono text-slate-400">ETA: ~90s</span>
+                        <span id="etaBadge" class="text-xs font-mono text-slate-400">ETA: ~90s (after start)</span>
                     </div>
                     <h2 id="installationHeadline" class="text-lg sm:text-xl font-bold text-white mt-2">
-                        Mounting BLW Core API Services & Controller Drivers...
+                        BLW System Installation Awaiting Operator Command...
                     </h2>
                 </div>
 
@@ -218,7 +292,7 @@
 
             <!-- Master Progress Bar -->
             <div class="w-full bg-slate-900/90 h-4 rounded-full p-0.5 border border-slate-700/60 overflow-hidden relative shadow-inner">
-                <div id="masterProgressBar" class="h-full rounded-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-teal-300 transition-all duration-300 ease-out relative" style="width: 2%;">
+                <div id="masterProgressBar" class="h-full rounded-full bg-gradient-to-r from-cyan-600 via-cyan-400 to-teal-300 transition-all duration-300 ease-out relative" style="width: 0%;">
                     <!-- High-tech light glow head -->
                     <div class="absolute right-0 top-0 bottom-0 w-3 bg-white blur-[2px] opacity-90 rounded-full"></div>
                 </div>
@@ -247,17 +321,17 @@
                 </div>
 
                 <!-- CHECKPOINT 1 -->
-                <div id="cardCp1" class="border border-cyan-500/50 bg-slate-900/70 rounded-xl p-4 sm:p-5 relative transition-all duration-500">
+                <div id="cardCp1" class="border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500">
                     <div class="flex items-start justify-between gap-3">
                         <div class="flex items-start gap-3.5">
-                            <div id="cp1IconContainer" class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0">
-                                <i id="cp1Icon" class="fa-solid fa-circle-notch fa-spin text-lg"></i>
+                            <div id="cp1IconContainer" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center shrink-0">
+                                <i id="cp1Icon" class="fa-solid fa-hourglass-start text-base"></i>
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">Checkpoint 1</span>
-                                    <span id="cp1Badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700">
-                                        RUNNING (~1 min milestone)
+                                    <span class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400" id="cp1Tag">Checkpoint 1</span>
+                                    <span id="cp1Badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                                        STANDBY (~1 min milestone after start)
                                     </span>
                                 </div>
                                 <h4 class="text-sm sm:text-base font-semibold text-white mt-0.5">
@@ -269,14 +343,14 @@
                             </div>
                         </div>
                         <div class="text-right font-mono text-xs hidden sm:block shrink-0">
-                            <span id="cp1Countdown" class="text-yellow-400 font-semibold text-sm block">00:59</span>
+                            <span id="cp1Countdown" class="text-slate-400 font-semibold text-sm block">01:00</span>
                             <span class="text-slate-500 text-[10px]">TIME TO SYNC</span>
                         </div>
                     </div>
 
                     <!-- Mini progress line for CP1 -->
                     <div class="mt-3.5 w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                        <div id="cp1ProgressBar" class="h-full bg-cyan-400 transition-all duration-200" style="width: 3%;"></div>
+                        <div id="cp1ProgressBar" class="h-full bg-cyan-400 transition-all duration-200" style="width: 0%;"></div>
                     </div>
                 </div>
 
@@ -352,9 +426,9 @@
                         <i class="fa-solid fa-diagram-project text-teal-400"></i>
                         Board 1 Telemetry Link
                     </h3>
-                    <span id="boardLiveLed" class="flex items-center gap-1.5 text-xs font-mono text-amber-400">
-                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                        PROVISIONING
+                    <span id="boardLiveLed" class="flex items-center gap-1.5 text-xs font-mono text-slate-400">
+                        <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                        STANDBY
                     </span>
                 </div>
 
@@ -367,27 +441,27 @@
                             <span class="flex items-center gap-1 text-slate-300">
                                 <i class="fa-solid fa-server text-cyan-400"></i> PCB: BLW-B1-09
                             </span>
-                            <span class="text-[10px] text-cyan-400 font-bold" id="boardStatusBadge">BOOTING</span>
+                            <span class="text-[10px] text-amber-400 font-bold" id="boardStatusBadge">READY</span>
                         </div>
 
                         <!-- Board SVG Representation -->
                         <div class="relative my-2 w-36 h-36 flex items-center justify-center">
-                            <div class="absolute inset-0 rounded-xl border-2 border-dashed border-cyan-500/40 animate-[spin_40s_linear_infinite]"></div>
-                            <div class="w-28 h-28 bg-slate-900 border border-cyan-500/50 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col items-center justify-center p-2 relative">
-                                <div class="w-12 h-12 rounded bg-cyan-950 border border-cyan-400 flex items-center justify-center text-cyan-300">
-                                    <i id="chipIcon" class="fa-solid fa-microchip text-2xl animate-pulse"></i>
+                            <div id="boardSpinnerRing" class="absolute inset-0 rounded-xl border-2 border-dashed border-slate-700"></div>
+                            <div class="w-28 h-28 bg-slate-900 border border-slate-700 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col items-center justify-center p-2 relative" id="boardInnerBox">
+                                <div class="w-12 h-12 rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400" id="chipIconWrapper">
+                                    <i id="chipIcon" class="fa-solid fa-microchip text-2xl"></i>
                                 </div>
                                 <span class="text-[10px] font-mono text-slate-200 mt-2 font-bold tracking-widest">BOARD 1</span>
                                 <div class="flex gap-1 mt-1">
-                                    <span id="pinLed1" class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-                                    <span id="pinLed2" class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                    <span id="pinLed1" class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
+                                    <span id="pinLed2" class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
                                     <span id="pinLed3" class="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
                                 </div>
                             </div>
                         </div>
 
                         <p class="text-[11px] font-mono text-slate-400 mt-1" id="boardNoticeText">
-                            Syncing registers via SPI/I2C bridge...
+                            Waiting for operator initialization...
                         </p>
                     </div>
 
@@ -395,15 +469,15 @@
                     <div class="space-y-2.5 font-mono text-xs">
                         <div class="flex justify-between items-center text-slate-400">
                             <span>API Gateway Sync</span>
-                            <span id="metricApi" class="text-cyan-400 font-medium">In Progress</span>
+                            <span id="metricApi" class="text-slate-500 font-medium">Standby</span>
                         </div>
                         <div class="w-full bg-slate-900 rounded-full h-1">
-                            <div id="metricApiBar" class="bg-cyan-400 h-full rounded-full transition-all duration-300" style="width: 15%"></div>
+                            <div id="metricApiBar" class="bg-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
 
                         <div class="flex justify-between items-center text-slate-400 pt-1">
                             <span>Subsystem Services</span>
-                            <span id="metricDrivers" class="text-slate-500 font-medium">Waiting</span>
+                            <span id="metricDrivers" class="text-slate-500 font-medium">Standby</span>
                         </div>
                         <div class="w-full bg-slate-900 rounded-full h-1">
                             <div id="metricDriversBar" class="bg-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -440,9 +514,9 @@
                         <i class="fa-solid fa-eraser mr-1"></i>Clear
                     </button>
                     <span class="text-slate-700">|</span>
-                    <span class="text-emerald-400 flex items-center gap-1 text-[11px]">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        STREAM LIVE
+                    <span id="streamStatusIndicator" class="text-amber-400 flex items-center gap-1 text-[11px]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                        STANDBY
                     </span>
                 </div>
             </div>
@@ -566,9 +640,10 @@
         };
 
         let state = {
+            hasStarted: false,   // Must start via user action
             elapsedMs: 0,
             speedMultiplier: 1, // Can be 1x or 10x for fast testing
-            isRunning: true,
+            isRunning: false,    // Starts false on load!
             isAudioEnabled: true,
             currentCheckpoint: 1, // 1, 2, 3, or 'COMPLETED'
             progressPercent: 0,
@@ -611,7 +686,16 @@
 
                 const now = ctx.currentTime;
 
-                if (type === 'tick') {
+                if (type === 'start') {
+                    // Start installation power-on synth surge
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                } else if (type === 'tick') {
                     // Soft high-tech telemetry pulse
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(800, now);
@@ -683,6 +767,74 @@
         }
 
         /* ========================================================
+           TRIGGER / START INSTALLATION PROGRAM
+           ======================================================== */
+        function startInstallationProgram() {
+            if (state.hasStarted && state.isRunning) return;
+
+            // Dismiss pre-launch modal
+            const preModal = document.getElementById('preLaunchModal');
+            if (preModal) {
+                preModal.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => preModal.classList.add('hidden'), 400);
+            }
+
+            state.hasStarted = true;
+            state.isRunning = true;
+
+            // Warm up audio and play trigger sound
+            getAudioContext();
+            playSound('start');
+
+            // Header Start button updates to indicate Running
+            const headerBtn = document.getElementById('headerStartBtn');
+            if (headerBtn) {
+                headerBtn.className = 'px-3 py-2 rounded-lg bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 text-xs font-mono font-bold flex items-center gap-2 cursor-default';
+                headerBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>Installing...</span>';
+            }
+
+            // Update System Status Pill
+            const pill = document.getElementById('systemStatusPill');
+            pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+            pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> BUS ACTIVE';
+
+            // Stream Live indicator
+            const streamIndicator = document.getElementById('streamStatusIndicator');
+            streamIndicator.className = 'text-emerald-400 flex items-center gap-1 text-[11px]';
+            streamIndicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> STREAM LIVE';
+
+            // Card 1 UI Activation
+            const card1 = document.getElementById('cardCp1');
+            card1.className = 'border border-cyan-500/50 bg-slate-900/70 rounded-xl p-4 sm:p-5 relative transition-all duration-500';
+            document.getElementById('cp1IconContainer').className = 'w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0';
+            document.getElementById('cp1IconContainer').innerHTML = '<i id="cp1Icon" class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
+            document.getElementById('cp1Tag').className = 'text-xs font-mono font-bold uppercase tracking-wider text-cyan-400';
+            document.getElementById('cp1Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700';
+            document.getElementById('cp1Badge').textContent = 'RUNNING (~1 min milestone)';
+            document.getElementById('cp1Countdown').className = 'text-yellow-400 font-semibold text-sm block';
+
+            // Board vector activation
+            document.getElementById('boardLiveLed').className = 'flex items-center gap-1.5 text-xs font-mono text-amber-400';
+            document.getElementById('boardLiveLed').innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> PROVISIONING';
+            document.getElementById('boardStatusBadge').textContent = 'BOOTING';
+            document.getElementById('boardSpinnerRing').className = 'absolute inset-0 rounded-xl border-2 border-dashed border-cyan-500/40 animate-[spin_40s_linear_infinite]';
+            document.getElementById('boardInnerBox').className = 'w-28 h-28 bg-slate-900 border border-cyan-500/50 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col items-center justify-center p-2 relative';
+            document.getElementById('chipIconWrapper').className = 'w-12 h-12 rounded bg-cyan-950 border border-cyan-400 flex items-center justify-center text-cyan-300';
+            document.getElementById('chipIcon').classList.add('animate-pulse');
+            document.getElementById('pinLed1').className = 'w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping';
+            document.getElementById('pinLed2').className = 'w-1.5 h-1.5 rounded-full bg-yellow-400';
+            document.getElementById('boardNoticeText').textContent = 'Syncing registers via SPI/I2C bridge...';
+
+            // Hero badge
+            document.getElementById('liveStatusBadge').className = 'px-2.5 py-1 rounded text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider inline-flex items-center gap-1.5';
+            document.getElementById('liveStatusBadge').innerHTML = '<span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> INSTALLING APIS & SYSTEM COMPONENTS';
+            document.getElementById('installationHeadline').textContent = 'Mounting BLW Core API Services & Controller Drivers...';
+            document.getElementById('integrityDisplay').textContent = 'Verifying...';
+
+            startEngine();
+        }
+
+        /* ========================================================
            LOG STREAM POOL (REALISTIC INDUSTRIAL STRINGS)
            ======================================================== */
         const LOG_POOL_PHASE1 = [
@@ -729,7 +881,7 @@
             if (logInterval) clearInterval(logInterval);
 
             // Initial logs
-            appendLog('SYSTEM', 'BLW Bootloader initialized. Beginning installation sequence...');
+            appendLog('SYSTEM', 'BLW Bootloader initialized by operator. Beginning installation sequence...');
             appendLog('INFO', 'Target hardware: BLW Board 1 Revision 3.');
             appendLog('API', 'Connecting to API Gateway and beginning 60-second handshake process...');
 
@@ -1003,6 +1155,13 @@
             document.getElementById('liveStatusBadge').className = 'px-3 py-1 rounded text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500 uppercase tracking-wider inline-flex items-center gap-2';
             document.getElementById('etaBadge').textContent = 'Completed';
 
+            // Header button status
+            const headerBtn = document.getElementById('headerStartBtn');
+            if (headerBtn) {
+                headerBtn.className = 'px-3 py-2 rounded-lg bg-emerald-500 text-slate-950 text-xs font-mono font-bold flex items-center gap-2 cursor-default';
+                headerBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>Completed</span>';
+            }
+
             appendLog('SUCCESS', '****************************************************************');
             appendLog('SUCCESS', '>>> CHECKPOINT 3 SUCCEEDED: Board 1 Controller Verification passed.');
             appendLog('SUCCESS', '>>> INSTALLATION OF BOARD 1 IS DONE!');
@@ -1125,28 +1284,54 @@
            ======================================================== */
         function resetInstallation() {
             dismissModal();
+            if (timerInterval) clearInterval(timerInterval);
+            if (logInterval) clearInterval(logInterval);
+
             const banner = document.getElementById('liveBanner');
             banner.classList.add('translate-y-32');
             setTimeout(() => banner.classList.add('hidden'), 400);
 
+            // Re-show preLaunch modal
+            const preModal = document.getElementById('preLaunchModal');
+            if (preModal) {
+                preModal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            }
+
+            state.hasStarted = false;
+            state.isRunning = false;
             state.elapsedMs = 0;
-            state.isRunning = true;
             state.currentCheckpoint = 1;
             state.progressPercent = 0;
             state.hasPlayedCp1Beep = false;
             state.hasPlayedCp2Beep = false;
             state.hasPlayedCp3Beep = false;
 
+            // Reset Header Start button
+            const headerBtn = document.getElementById('headerStartBtn');
+            if (headerBtn) {
+                headerBtn.className = 'px-3 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold flex items-center gap-2 transition shadow-md';
+                headerBtn.innerHTML = '<i class="fa-solid fa-play"></i><span>Start Installation</span>';
+            }
+
+            const pill = document.getElementById('systemStatusPill');
+            pill.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/30';
+            pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> STANDBY';
+
+            const streamIndicator = document.getElementById('streamStatusIndicator');
+            streamIndicator.className = 'text-amber-400 flex items-center gap-1 text-[11px]';
+            streamIndicator.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> STANDBY';
+
             // Reset CP1
             const card1 = document.getElementById('cardCp1');
-            card1.className = 'border border-cyan-500/50 bg-slate-900/70 rounded-xl p-4 sm:p-5 relative transition-all duration-500';
-            document.getElementById('cp1IconContainer').className = 'w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shrink-0';
-            document.getElementById('cp1IconContainer').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-lg"></i>';
-            document.getElementById('cp1Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700';
-            document.getElementById('cp1Badge').textContent = 'RUNNING (~1 min milestone)';
-            document.getElementById('cp1Countdown').textContent = '00:59';
-            document.getElementById('cp1Countdown').className = 'text-yellow-400 font-semibold text-sm block';
-            document.getElementById('cp1ProgressBar').style.width = '2%';
+            card1.className = 'border border-slate-800 bg-slate-900/40 rounded-xl p-4 sm:p-5 relative transition-all duration-500';
+            document.getElementById('cp1IconContainer').className = 'w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center shrink-0';
+            document.getElementById('cp1IconContainer').innerHTML = '<i id="cp1Icon" class="fa-solid fa-hourglass-start text-base"></i>';
+            document.getElementById('cp1Tag').className = 'text-xs font-mono font-bold uppercase tracking-wider text-slate-400';
+            document.getElementById('cp1Badge').className = 'text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400';
+            document.getElementById('cp1Badge').textContent = 'STANDBY (~1 min milestone after start)';
+            document.getElementById('cp1Countdown').textContent = '01:00';
+            document.getElementById('cp1Countdown').className = 'text-slate-400 font-semibold text-sm block';
+            document.getElementById('cp1ProgressBar').style.width = '0%';
             document.getElementById('cp1ProgressBar').className = 'h-full bg-cyan-400 transition-all duration-200';
 
             // Reset CP2
@@ -1174,48 +1359,54 @@
             document.getElementById('cp3ProgressBar').className = 'h-full bg-emerald-400 transition-all duration-200';
 
             // Reset Header & Global Metrics
-            document.getElementById('installationHeadline').textContent = 'Mounting BLW Core API Services & Controller Drivers...';
-            document.getElementById('liveStatusBadge').className = 'px-2.5 py-1 rounded text-xs font-mono font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase tracking-wider inline-flex items-center gap-1.5';
+            document.getElementById('elapsedTimerDisplay').textContent = '00:00.0s';
+            document.getElementById('installationHeadline').textContent = 'BLW System Installation Awaiting Operator Command...';
+            document.getElementById('liveStatusBadge').className = 'px-2.5 py-1 rounded text-xs font-mono font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider inline-flex items-center gap-1.5';
             document.getElementById('liveStatusBadge').innerHTML = `
-                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-                INSTALLING APIS & SYSTEM COMPONENTS
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                SYSTEM STANDBY • CLICK 'START INSTALLATION'
             `;
-            document.getElementById('etaBadge').textContent = 'ETA: ~90s';
+            document.getElementById('etaBadge').textContent = 'ETA: ~90s (after start)';
             document.getElementById('percentageNumber').textContent = '0';
-            document.getElementById('masterProgressBar').style.width = '2%';
-            document.getElementById('telemetryPhase').textContent = "Connecting Endpoints";
+            document.getElementById('masterProgressBar').style.width = '0%';
+            document.getElementById('telemetryPhase').textContent = "Standby Mode";
             document.getElementById('telemetryPhase').className = "text-base sm:text-lg font-semibold text-white mt-1 font-mono truncate";
-            document.getElementById('telemetrySub').textContent = "Port 8080: Handshaking";
-            document.getElementById('integrityDisplay').textContent = "Verifying...";
+            document.getElementById('telemetrySub').textContent = "Press 'Start' to begin";
+            document.getElementById('integrityDisplay').textContent = "Standby";
             document.getElementById('integrityDisplay').className = "text-base sm:text-lg font-semibold text-white mt-1 font-mono";
 
             // Reset Board visualizer
-            document.getElementById('boardLiveLed').className = "flex items-center gap-1.5 text-xs font-mono text-amber-400";
-            document.getElementById('boardLiveLed').innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> PROVISIONING';
-            document.getElementById('boardStatusBadge').textContent = 'BOOTING';
-            document.getElementById('boardStatusBadge').className = 'text-[10px] text-cyan-400 font-bold';
-            document.getElementById('boardNoticeText').textContent = 'Syncing registers via SPI/I2C bridge...';
+            document.getElementById('boardLiveLed').className = "flex items-center gap-1.5 text-xs font-mono text-slate-400";
+            document.getElementById('boardLiveLed').innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span> STANDBY';
+            document.getElementById('boardStatusBadge').textContent = 'READY';
+            document.getElementById('boardStatusBadge').className = 'text-[10px] text-amber-400 font-bold';
+            document.getElementById('boardSpinnerRing').className = 'absolute inset-0 rounded-xl border-2 border-dashed border-slate-700';
+            document.getElementById('boardInnerBox').className = 'w-28 h-28 bg-slate-900 border border-slate-700 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.15)] flex flex-col items-center justify-center p-2 relative';
+            document.getElementById('chipIconWrapper').className = 'w-12 h-12 rounded bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400';
+            document.getElementById('chipIcon').classList.remove('animate-pulse');
+            document.getElementById('boardNoticeText').textContent = 'Waiting for operator initialization...';
             document.getElementById('boardNoticeText').className = 'text-[11px] font-mono text-slate-400 mt-1';
-            document.getElementById('pinLed1').className = 'w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping';
-            document.getElementById('pinLed2').className = 'w-1.5 h-1.5 rounded-full bg-yellow-400';
+            document.getElementById('pinLed1').className = 'w-1.5 h-1.5 rounded-full bg-slate-600';
+            document.getElementById('pinLed2').className = 'w-1.5 h-1.5 rounded-full bg-slate-600';
             document.getElementById('pinLed3').className = 'w-1.5 h-1.5 rounded-full bg-slate-700';
 
-            document.getElementById('metricApi').textContent = 'In Progress';
-            document.getElementById('metricApiBar').style.width = '10%';
-            document.getElementById('metricDrivers').textContent = 'Waiting';
+            document.getElementById('metricApi').textContent = 'Standby';
+            document.getElementById('metricApiBar').style.width = '0%';
+            document.getElementById('metricDrivers').textContent = 'Standby';
             document.getElementById('metricDriversBar').style.width = '0%';
             document.getElementById('metricBoard').textContent = 'Locked';
             document.getElementById('metricBoardBar').style.width = '0%';
 
             clearConsole();
-            startEngine();
+            appendLog('SYSTEM', 'BLW Installation console in STANDBY. Ready for operator initialization.');
         }
 
         /* ========================================================
-           STARTUP
+           STARTUP (PAGE LOADS IN STANDBY - DOES NOT RUN AUTOMATICALLY)
            ======================================================== */
         window.onload = function() {
-            startEngine();
+            appendLog('SYSTEM', 'BLW Installation console initialized.');
+            appendLog('READY', 'Pre-flight checks passed. Awaiting operator trigger: "Start Installation"...');
         };
     </script>
 </body>
