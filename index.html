@@ -1,17 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BLW Live AQI Display</title>
- 
+
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
- 
+
     html, body {
       width: 100vw;
       height: 100vh;
@@ -25,7 +26,7 @@
       align-items: center;
       justify-content: center;
     }
- 
+
     .screen-wrapper {
       width: 100vw;
       height: 100vh;
@@ -34,7 +35,7 @@
       align-items: center;
       justify-content: center;
     }
- 
+
     .screen {
       width: 100%;
       height: 100%;
@@ -49,17 +50,22 @@
       border-radius: 4px;
       overflow: hidden;
     }
- 
-    .border-b { border-bottom: 2.5px solid #ff2b2b; }
-    .border-r { border-right: 2.5px solid #ff2b2b; }
- 
+
+    .border-b {
+      border-bottom: 2.5px solid #ff2b2b;
+    }
+
+    .border-r {
+      border-right: 2.5px solid #ff2b2b;
+    }
+
     .header {
       padding: 0.9vh 2vw 0.7vh;
       text-align: center;
       flex-shrink: 0;
       background: #14151a;
     }
- 
+
     .title {
       color: #ff3333;
       font-size: clamp(18px, 2.4vw, 36px);
@@ -68,7 +74,7 @@
       text-transform: uppercase;
       line-height: 1.2;
     }
- 
+
     .meta-row {
       display: flex;
       justify-content: space-between;
@@ -79,7 +85,7 @@
       letter-spacing: 0.5px;
       padding: 0 0.5vw;
     }
- 
+
     .aqi-banner {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -88,7 +94,7 @@
       min-height: 0;
       background: #16171d;
     }
- 
+
     .aqi-title {
       text-align: center;
       color: #ff3333;
@@ -100,7 +106,7 @@
       align-items: center;
       justify-content: center;
     }
- 
+
     .aqi-score {
       text-align: center;
       color: #00e699;
@@ -113,7 +119,7 @@
       justify-content: center;
       font-variant-numeric: tabular-nums;
     }
- 
+
     .grid-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -122,7 +128,7 @@
       min-height: 0;
       background: #111215;
     }
- 
+
     .cell {
       display: flex;
       justify-content: space-between;
@@ -130,7 +136,7 @@
       padding: 0 2.2vw;
       min-height: 0;
     }
- 
+
     .label {
       color: #ff3333;
       font-size: clamp(13px, 1.6vw, 22px);
@@ -138,7 +144,7 @@
       letter-spacing: 0.4px;
       white-space: nowrap;
     }
- 
+
     .val {
       font-size: clamp(16px, 2.2vw, 32px);
       font-weight: 900;
@@ -146,18 +152,37 @@
       white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
- 
+
     .val-green { color: #00e676; }
     .val-blue  { color: #7388ff; }
     .val-cyan  { color: #00e5ff; }
     .val-amber { color: #ffab40; }
+
+    .shutdown-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2vw;
+    }
+
+    .shutdown-msg {
+      color: #ff2222;
+      font-size: clamp(24px, 4.5vw, 60px);
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
   </style>
 </head>
- 
+
 <body>
   <div class="screen-wrapper">
     <div class="screen" id="screenContainer">
- 
+
       <div class="header border-b">
         <div class="title">BANARAS LOCOMOTIVE WORKS (BLW)</div>
         <div class="meta-row">
@@ -165,12 +190,12 @@
           <span id="screenTime">Time: --:--:--</span>
         </div>
       </div>
- 
+
       <div class="aqi-banner border-b">
         <div class="aqi-title border-r">A Q I</div>
         <div class="aqi-score" id="aqiVal">--</div>
       </div>
- 
+
       <div class="grid-container">
         <div class="cell border-r border-b">
           <span class="label">PM 2.5 (µg/m³) -</span>
@@ -180,7 +205,7 @@
           <span class="label">PM 10 (µg/m³) -</span>
           <span class="val val-green" id="pm10Val">--</span>
         </div>
- 
+
         <div class="cell border-r border-b">
           <span class="label">SOx (µg/m³) -</span>
           <span class="val val-green" id="soxVal">--</span>
@@ -189,7 +214,7 @@
           <span class="label">NOx (µg/m³) -</span>
           <span class="val val-green" id="noxVal">--</span>
         </div>
- 
+
         <div class="cell border-r border-b">
           <span class="label">CO (µg/m³) -</span>
           <span class="val val-blue" id="coVal">--</span>
@@ -198,7 +223,7 @@
           <span class="label">O₃ (µg/m³) -</span>
           <span class="val val-green" id="o3Val">--</span>
         </div>
- 
+
         <div class="cell border-r">
           <span class="label">Temp (°C) -</span>
           <span class="val val-cyan" id="tempVal">--</span>
@@ -208,11 +233,13 @@
           <span class="val val-amber" id="humVal">--</span>
         </div>
       </div>
- 
+
     </div>
   </div>
- 
+
   <script>
+    const IS_ACTIVE = true;
+
     const CONSTANT_FALLBACK = {
       aqi: "51",
       pm25: "32.9",
@@ -224,139 +251,157 @@
       temp: "20.86",
       hum: "71.3"
     };
- 
-    const LAT = 25.2818;
-    const LON = 82.9691;
- 
-    const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
-    const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
- 
-    function updateClock() {
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const hh = String(now.getHours()).padStart(2, '0');
-      const min = String(now.getMinutes()).padStart(2, '0');
-      const ss = String(now.getSeconds()).padStart(2, '0');
- 
-      const dateEl = document.getElementById('screenDate');
-      const timeEl = document.getElementById('screenTime');
-      if (dateEl) dateEl.textContent = `Date: ${yyyy}/${mm}/${dd}`;
-      if (timeEl) timeEl.textContent = `Time: ${hh}:${min}:${ss}`;
-    }
- 
-    function setValues(data) {
-      try {
-        document.getElementById('aqiVal').textContent  = data.aqi;
-        document.getElementById('pm25Val').textContent = data.pm25;
-        document.getElementById('pm10Val').textContent = data.pm10;
-        document.getElementById('soxVal').textContent  = data.sox;
-        document.getElementById('noxVal').textContent  = data.nox;
-        document.getElementById('coVal').textContent   = data.co;
-        document.getElementById('o3Val').textContent   = data.o3;
-        document.getElementById('tempVal').textContent = data.temp;
-        document.getElementById('humVal').textContent  = data.hum;
-      } catch (e) {
-        console.error("DOM update error:", e);
-      }
-    }
- 
-    function calculateIndianAQI(pm25, pm10) {
-      function getSubIndex(val, breakpoints) {
-        if (val == null || isNaN(val)) return 0;
-        for (let bp of breakpoints) {
-          if (val >= bp.cLow && val <= bp.cHigh) {
-            return ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) * (val - bp.cLow) + bp.iLow;
-          }
+
+    if (!IS_ACTIVE) {
+      document.getElementById('screenContainer').innerHTML = `
+        <div class="shutdown-screen">
+          <div class="shutdown-msg">SYSTEM OFFLINE</div>
+        </div>
+      `;
+    } else {
+      const LAT = 25.2818;
+      const LON = 82.9691;
+
+      const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+
+      const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
+
+      function updateClock() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+
+        const dateEl = document.getElementById('screenDate');
+        const timeEl = document.getElementById('screenTime');
+
+        if (dateEl && timeEl) {
+          dateEl.textContent = `Date: ${yyyy}/${mm}/${dd}`;
+          timeEl.textContent = `Time: ${hh}:${min}:${ss}`;
         }
-        return val > 500 ? 500 : 0;
       }
- 
-      const pm25BP = [
-        { cLow: 0,   cHigh: 30,  iLow: 0,   iHigh: 50 },
-        { cLow: 31,  cHigh: 60,  iLow: 51,  iHigh: 100 },
-        { cLow: 61,  cHigh: 90,  iLow: 101, iHigh: 200 },
-        { cLow: 91,  cHigh: 120, iLow: 201, iHigh: 300 },
-        { cLow: 121, cHigh: 250, iLow: 301, iHigh: 400 },
-        { cLow: 250, cHigh: 500, iLow: 401, iHigh: 500 }
-      ];
- 
-      const pm10BP = [
-        { cLow: 0,   cHigh: 50,  iLow: 0,   iHigh: 50 },
-        { cLow: 51,  cHigh: 100, iLow: 51,  iHigh: 100 },
-        { cLow: 101, cHigh: 250, iLow: 101, iHigh: 200 },
-        { cLow: 251, cHigh: 350, iLow: 201, iHigh: 300 },
-        { cLow: 351, cHigh: 430, iLow: 301, iHigh: 400 },
-        { cLow: 430, cHigh: 600, iLow: 401, iHigh: 500 }
-      ];
- 
-      const i1 = getSubIndex(pm25, pm25BP);
-      const i2 = getSubIndex(pm10, pm10BP);
-      return Math.round(Math.max(i1, i2));
-    }
- 
-    async function fetchAQIData() {
-      try {
-        const [airRes, weatherRes] = await Promise.all([
-          fetch(AIR_URL).then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json();
-          }),
-          fetch(WEATHER_URL).then(r => {
-            if (!r.idx && !r.ok) throw new Error(`HTTP ${r.status}`);
-            return r.json();
-          })
-        ]);
- 
-        const air = airRes?.current;
-        const weather = weatherRes?.current;
- 
-        if (!air || !weather) throw new Error("Empty API data");
- 
-        const SCALE_FACTOR = 0.4;
- 
-        const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
-        const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
-        const sox  = (air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox)) * SCALE_FACTOR;
-        const nox  = (air.nitrogen_dioxide ?? parseFloat(CONSTANT_FALLBACK.nox)) * SCALE_FACTOR;
-        const co   = (air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co)) * SCALE_FACTOR;
-        const o3   = (air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3)) * SCALE_FACTOR;
- 
-        const temp = weather.temperature_2m ?? parseFloat(CONSTANT_FALLBACK.temp);
-        const hum  = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
- 
-        let calculatedAQI = calculateIndianAQI(pm25, pm10);
-        if (!calculatedAQI || calculatedAQI <= 0) calculatedAQI = 52;
- 
-        setValues({
-          aqi: calculatedAQI,
-          pm25: pm25.toFixed(1),
-          pm10: pm10.toFixed(2),
-          sox: sox.toFixed(2),
-          nox: nox.toFixed(2),
-          co: co.toFixed(2),
-          o3: o3.toFixed(2),
-          temp: temp.toFixed(2),
-          hum: hum.toFixed(1)
-        });
- 
-      } catch (err) {
-        console.warn('API fetch error, keeping fallback/previous data:', err);
-        // Fallback data set korbe jate screen faka na hoy
-        setValues(CONSTANT_FALLBACK);
+
+      function setFallbackData() {
+        document.getElementById('aqiVal').textContent = CONSTANT_FALLBACK.aqi;
+        document.getElementById('pm25Val').textContent = CONSTANT_FALLBACK.pm25;
+        document.getElementById('pm10Val').textContent = CONSTANT_FALLBACK.pm10;
+        document.getElementById('soxVal').textContent = CONSTANT_FALLBACK.sox;
+        document.getElementById('noxVal').textContent = CONSTANT_FALLBACK.nox;
+        document.getElementById('coVal').textContent = CONSTANT_FALLBACK.co;
+        document.getElementById('o3Val').textContent = CONSTANT_FALLBACK.o3;
+        document.getElementById('tempVal').textContent = CONSTANT_FALLBACK.temp;
+        document.getElementById('humVal').textContent = CONSTANT_FALLBACK.hum;
       }
+
+      function calculateIndianAQI(pm25, pm10) {
+        function getSubIndex(val, breakpoints) {
+          if (val == null || isNaN(val)) return 0;
+
+          for (let bp of breakpoints) {
+            if (val >= bp.cLow && val <= bp.cHigh) {
+              return (
+                ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) *
+                (val - bp.cLow) +
+                bp.iLow
+              );
+            }
+          }
+
+          return val > 500 ? 500 : 0;
+        }
+
+        const pm25BP = [
+          { cLow: 0, cHigh: 30, iLow: 0, iHigh: 50 },
+          { cLow: 31, cHigh: 60, iLow: 51, iHigh: 100 },
+          { cLow: 61, cHigh: 90, iLow: 101, iHigh: 200 },
+          { cLow: 91, cHigh: 120, iLow: 201, iHigh: 300 },
+          { cLow: 121, cHigh: 250, iLow: 301, iHigh: 400 },
+          { cLow: 250, cHigh: 500, iLow: 401, iHigh: 500 }
+        ];
+
+        const pm10BP = [
+          { cLow: 0, cHigh: 50, iLow: 0, iHigh: 50 },
+          { cLow: 51, cHigh: 100, iLow: 51, iHigh: 100 },
+          { cLow: 101, cHigh: 250, iLow: 101, iHigh: 200 },
+          { cLow: 251, cHigh: 350, iLow: 201, iHigh: 300 },
+          { cLow: 351, cHigh: 430, iLow: 301, iHigh: 400 },
+          { cLow: 430, cHigh: 600, iLow: 401, iHigh: 500 }
+        ];
+
+        const i1 = getSubIndex(pm25, pm25BP);
+        const i2 = getSubIndex(pm10, pm10BP);
+
+        return Math.round(Math.max(i1, i2));
+      }
+
+      async function fetchAQIData() {
+        try {
+          const cacheBuster = `&_t=${Date.now()}`;
+
+          const [airRes, weatherRes] = await Promise.all([
+            fetch(AIR_URL + cacheBuster).then(r => {
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              return r.json();
+            }),
+            fetch(WEATHER_URL + cacheBuster).then(r => {
+              if (!r.ok) throw new Error(`HTTP ${r.status}`);
+              return r.json();
+            })
+          ]);
+
+          const air = airRes?.current;
+          const weather = weatherRes?.current;
+
+          if (!air || !weather) {
+            throw new Error("Empty API data");
+          }
+
+          const SCALE_FACTOR = 0.4;
+
+          const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
+          const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
+          const sox = (air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox)) * SCALE_FACTOR;
+          const nox = (air.nitrogen_dioxide ?? parseFloat(CONSTANT_FALLBACK.nox)) * SCALE_FACTOR;
+          const co = (air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co)) * SCALE_FACTOR;
+          const o3 = (air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3)) * SCALE_FACTOR;
+
+          const temp = weather.temperature_2m ?? parseFloat(CONSTANT_FALLBACK.temp);
+          const hum = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
+
+          let calculatedAQI = calculateIndianAQI(pm25, pm10);
+
+          if (!calculatedAQI || calculatedAQI <= 0) {
+            calculatedAQI = 52;
+          }
+
+          document.getElementById('aqiVal').textContent = calculatedAQI;
+          document.getElementById('pm25Val').textContent = pm25.toFixed(1);
+          document.getElementById('pm10Val').textContent = pm10.toFixed(2);
+          document.getElementById('soxVal').textContent = sox.toFixed(2);
+          document.getElementById('noxVal').textContent = nox.toFixed(2);
+          document.getElementById('coVal').textContent = co.toFixed(2);
+          document.getElementById('o3Val').textContent = o3.toFixed(2);
+          document.getElementById('tempVal').textContent = temp.toFixed(2);
+          document.getElementById('humVal').textContent = hum.toFixed(1);
+
+        } catch (err) {
+          console.warn('API error, using fallback:', err);
+          setFallbackData();
+        }
+      }
+
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // First API call on page load
+      fetchAQIData();
+
+      // Refresh every 5 seconds
+      setInterval(fetchAQIData, 5000);
     }
- 
-    // Clock update every second
-    setInterval(updateClock, 1000);
-    updateClock();
- 
-    // Initial load
-    fetchAQIData();
- 
-    // Fetch new data every 30 seconds (5 second er bodole 30 second korle API rate-limit ba network choke hobar chance thakbe na)
-    setInterval(fetchAQIData, 30000);
   </script>
 </body>
 </html>
