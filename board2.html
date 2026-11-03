@@ -276,19 +276,19 @@
  
       const pm25BP = [
         { cLow: 0,   cHigh: 30,  iLow: 0,   iHigh: 50 },
-        { cLow: 31,  cHigh: 60,  iLow: 51,  iHigh: 100 },
-        { cLow: 61,  cHigh: 90,  iLow: 101, iHigh: 200 },
-        { cLow: 91,  cHigh: 120, iLow: 201, iHigh: 300 },
-        { cLow: 121, cHigh: 250, iLow: 301, iHigh: 400 },
+        { cLow: 30,  cHigh: 60,  iLow: 51,  iHigh: 100 },
+        { cLow: 60,  cHigh: 90,  iLow: 101, iHigh: 200 },
+        { cLow: 90,  cHigh: 120, iLow: 201, iHigh: 300 },
+        { cLow: 120, cHigh: 250, iLow: 301, iHigh: 400 },
         { cLow: 250, cHigh: 500, iLow: 401, iHigh: 500 }
       ];
  
       const pm10BP = [
         { cLow: 0,   cHigh: 50,  iLow: 0,   iHigh: 50 },
-        { cLow: 51,  cHigh: 100, iLow: 51,  iHigh: 100 },
-        { cLow: 101, cHigh: 250, iLow: 101, iHigh: 200 },
-        { cLow: 251, cHigh: 350, iLow: 201, iHigh: 300 },
-        { cLow: 351, cHigh: 430, iLow: 301, iHigh: 400 },
+        { cLow: 50,  cHigh: 100, iLow: 51,  iHigh: 100 },
+        { cLow: 100, cHigh: 250, iLow: 101, iHigh: 200 },
+        { cLow: 250, cHigh: 350, iLow: 201, iHigh: 300 },
+        { cLow: 350, cHigh: 430, iLow: 301, iHigh: 400 },
         { cLow: 430, cHigh: 600, iLow: 401, iHigh: 500 }
       ];
  
@@ -299,12 +299,13 @@
  
     async function fetchAQIData() {
       try {
+        const cacheBuster = `&_t=${Date.now()}`;
         const [airRes, weatherRes] = await Promise.all([
-          fetch(AIR_URL).then(r => {
+          fetch(AIR_URL + cacheBuster).then(r => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
           }),
-          fetch(WEATHER_URL).then(r => {
+          fetch(WEATHER_URL + cacheBuster).then(r => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
             return r.json();
           })
@@ -315,7 +316,7 @@
  
         if (!air || !weather) throw new Error("Empty API data");
  
-        const SCALE_FACTOR = 0.5;
+        const SCALE_FACTOR = 0.55;
  
         const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
         const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
@@ -328,7 +329,7 @@
         const hum  = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
  
         let calculatedAQI = calculateIndianAQI(pm25, pm10);
-        if (!calculatedAQI || calculatedAQI <= 0) calculatedAQI = 44;
+        if (!calculatedAQI || calculatedAQI <= 0) calculatedAQI = parseInt(CONSTANT_FALLBACK.aqi) || 44;
  
         setValues({
           aqi: calculatedAQI,
