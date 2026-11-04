@@ -214,6 +214,7 @@
   </div>
  
   <script>
+    const dynamicMode = false; // true: Live API data (with fallback on error), false: Hardcoded data only
     const CONSTANT_FALLBACK = {
       aqi: "44",
       pm25: "22.9",
@@ -229,8 +230,8 @@
     const LAT = 25.2818;
     const LON = 82.9691;
  
-   // const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
-   // const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
+    const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+    const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
  
     function updateClock() {
       const now = new Date();
@@ -354,10 +355,16 @@
     setInterval(updateClock, 1000);
     updateClock();
  
-    fetchAQIData();
+    // Populate with fallback data immediately so display is ready
+    setValues(CONSTANT_FALLBACK);
+
+    // If dynamicMode is true, fetch live API data; otherwise stay in hardcoded mode
+    if (dynamicMode) {
+      fetchAQIData();
  
-    // 30 seconds interval to keep board 2 stable
-    setInterval(fetchAQIData, 30000);
+      // 30 seconds interval to keep board 2 stable
+      setInterval(fetchAQIData, 30000);
+    }
   </script>
 </body>
 </html>
