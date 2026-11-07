@@ -252,17 +252,86 @@
     //   temp: "20.86",
     //   hum: "71.3"
     // };
-    const CONSTANT_FALLBACK = {
-  aqi: "71",
-  pm25: "32.9",
-  pm10: "44.09",
-  sox: "12.23",
-  nox: "6.38",
-  co: "151.58",
-  o3: "3.69",
-  temp: "30",
-  hum: "71.3"
-};
+    function getSimulatedReadings() {
+      const now = new Date();
+      const h = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
+
+      // Day-of-year variance for atmospheric seasonality (varies subtly across weeks & seasons)
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const dayOfYear = Math.floor((now - startOfYear) / 86400000);
+      const dayVariance = 1 + 0.05 * Math.sin((2 * Math.PI * dayOfYear) / 365) + 0.03 * Math.cos((2 * Math.PI * dayOfYear) / 28);
+
+      // Smooth live micro-variance across refresh cycles (subtle ±1-2% organic drift)
+      const timeSeed = now.getMinutes() + now.getSeconds() / 60;
+      const microJitter = 1 + 0.015 * Math.sin(timeSeed * 0.4) + 0.01 * Math.cos(timeSeed * 0.7);
+
+      // Temperature & Humidity: Natural daily cycle (cooler mornings/nights around 18-19°C, peaking around 30-31°C in the afternoon, with humidity behaving inversely)
+      let solarCycle;
+      if (h >= 5.5 && h <= 15.0) {
+        solarCycle = -Math.cos(((h - 5.5) / 9.5) * Math.PI); // -1 at 5:30 AM to +1 at 3:00 PM
+      } else {
+        const nh = h < 5.5 ? h + 24 : h;
+        solarCycle = Math.cos(((nh - 15.0) / 14.5) * Math.PI); // +1 at 3:00 PM to -1 at 5:30 AM
+      }
+
+      const tempVal = 24.8 + 6.0 * solarCycle;
+      const humVal = Math.min(95, Math.max(30, 58.0 - 18.0 * solarCycle));
+
+      // 3-4 Daily Shifts/Phases:
+      // Phase 1: Morning traffic & factory shift start (08:00 - 10:30) -> rises to ~76-78
+      // Phase 2: Afternoon solar boundary-layer dispersion (13:00 - 15:30) -> dips to ~52-55
+      // Phase 3: Evening traffic & thermal inversion (18:30 - 21:30) -> rises to ~76-79
+      // Phase 4: Night & pre-dawn calm (02:30 - 05:30) -> dips to ~52-54
+      const morningRush = Math.exp(-Math.pow(h - 9.0, 2) / 4.5);
+      const eveningRush = Math.exp(-Math.pow(h - 20.0, 2) / 6.0);
+      const afternoonDip = Math.exp(-Math.pow(h - 14.5, 2) / 5.0);
+      const nightDip = Math.exp(-Math.pow(h - 3.5, 2) / 6.0);
+
+      const dayShift = 1.5 * Math.sin((2 * Math.PI * dayOfYear) / 365) + 0.8 * Math.cos((2 * Math.PI * dayOfYear) / 28);
+      const microShift = 0.8 * Math.sin(timeSeed * 0.3) + 0.5 * Math.cos(timeSeed * 0.7);
+
+      // Base target AQI calibrated so diurnal cycle moves smoothly between 50 and 80:
+      let targetAQI = 64.0 + 13.0 * morningRush + 14.0 * eveningRush - 12.0 * afternoonDip - 11.0 * nightDip + dayShift + microShift;
+      
+      // Strict constraint: between 50 and 80 (not more, not less)
+      targetAQI = Math.min(80.0, Math.max(50.0, targetAQI));
+
+      // PM2.5 and PM10 scaled directly to correspond to this AQI range
+      const pm25 = 30.0 + ((targetAQI - 50.0) / 30.0) * 17.5;
+      const pm10 = 50.0 + ((targetAQI - 50.0) / 30.0) * 29.5;
+
+      const pollutionFactor = (targetAQI - 50.0) / 30.0;
+      const baseSOx  = 12.23;
+      const baseNOx  = 6.38;
+      const baseCO   = 151.58;
+      const baseO3   = 3.69;
+
+      const sox  = baseSOx  * (0.90 + 0.20 * pollutionFactor);
+      const nox  = baseNOx  * (0.80 + 0.40 * (morningRush + eveningRush));
+      const co   = baseCO   * (0.85 + 0.25 * (morningRush + eveningRush));
+
+      // Ozone increases photochemically during bright afternoon sunshine
+      const ozoneFactor = 0.65 + 0.75 * Math.max(0, Math.sin(((h - 7) * Math.PI) / 13));
+      const o3   = baseO3 * ozoneFactor * dayVariance;
+
+      let calculatedAQI = (typeof calculateIndianAQI === 'function' ? calculateIndianAQI(pm25, pm10) : Math.round(targetAQI));
+      // Hard guarantee: strictly 50 to 80 (not more, not less)
+      calculatedAQI = Math.min(80, Math.max(50, calculatedAQI));
+
+      return {
+        aqi: String(calculatedAQI),
+        pm25: pm25.toFixed(1),
+        pm10: pm10.toFixed(2),
+        sox: sox.toFixed(2),
+        nox: nox.toFixed(2),
+        co: co.toFixed(2),
+        o3: o3.toFixed(2),
+        temp: tempVal.toFixed(1),
+        hum: humVal.toFixed(1)
+      };
+    }
+
+    const CONSTANT_FALLBACK = getSimulatedReadings();
 
     if (!IS_ACTIVE) {
       document.getElementById('screenContainer').innerHTML = `
@@ -274,9 +343,9 @@
       const LAT = 25.2818;
       const LON = 82.9691;
 
-      const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+      // const AIR_URL = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
 
-      const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
+      // const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m`;
 
       function updateClock() {
         const now = new Date();
@@ -297,15 +366,16 @@
       }
 
       function setFallbackData() {
-        document.getElementById('aqiVal').textContent = CONSTANT_FALLBACK.aqi;
-        document.getElementById('pm25Val').textContent = CONSTANT_FALLBACK.pm25;
-        document.getElementById('pm10Val').textContent = CONSTANT_FALLBACK.pm10;
-        document.getElementById('soxVal').textContent = CONSTANT_FALLBACK.sox;
-        document.getElementById('noxVal').textContent = CONSTANT_FALLBACK.nox;
-        document.getElementById('coVal').textContent = CONSTANT_FALLBACK.co;
-        document.getElementById('o3Val').textContent = CONSTANT_FALLBACK.o3;
-        document.getElementById('tempVal').textContent = CONSTANT_FALLBACK.temp;
-        document.getElementById('humVal').textContent = CONSTANT_FALLBACK.hum;
+        const data = getSimulatedReadings();
+        document.getElementById('aqiVal').textContent = data.aqi;
+        document.getElementById('pm25Val').textContent = data.pm25;
+        document.getElementById('pm10Val').textContent = data.pm10;
+        document.getElementById('soxVal').textContent = data.sox;
+        document.getElementById('noxVal').textContent = data.nox;
+        document.getElementById('coVal').textContent = data.co;
+        document.getElementById('o3Val').textContent = data.o3;
+        document.getElementById('tempVal').textContent = data.temp;
+        document.getElementById('humVal').textContent = data.hum;
       }
 
       function calculateIndianAQI(pm25, pm10) {
@@ -372,21 +442,22 @@
           }
 
           const SCALE_FACTOR = 0.5;
+          const fallback = getSimulatedReadings();
 
-          const pm25 = (air.pm2_5 ?? parseFloat(CONSTANT_FALLBACK.pm25)) * SCALE_FACTOR;
-          const pm10 = (air.pm10 ?? parseFloat(CONSTANT_FALLBACK.pm10)) * SCALE_FACTOR;
-          const sox = (air.sulphur_dioxide ?? parseFloat(CONSTANT_FALLBACK.sox)) * SCALE_FACTOR;
-          const nox = (air.nitrogen_dioxide ?? parseFloat(CONSTANT_FALLBACK.nox)) * SCALE_FACTOR;
-          const co = (air.carbon_monoxide ?? parseFloat(CONSTANT_FALLBACK.co)) * SCALE_FACTOR;
-          const o3 = (air.ozone ?? parseFloat(CONSTANT_FALLBACK.o3)) * SCALE_FACTOR;
+          const pm25 = (air.pm2_5 ?? parseFloat(fallback.pm25)) * SCALE_FACTOR;
+          const pm10 = (air.pm10 ?? parseFloat(fallback.pm10)) * SCALE_FACTOR;
+          const sox = (air.sulphur_dioxide ?? parseFloat(fallback.sox)) * SCALE_FACTOR;
+          const nox = (air.nitrogen_dioxide ?? parseFloat(fallback.nox)) * SCALE_FACTOR;
+          const co = (air.carbon_monoxide ?? parseFloat(fallback.co)) * SCALE_FACTOR;
+          const o3 = (air.ozone ?? parseFloat(fallback.o3)) * SCALE_FACTOR;
 
-          const temp = weather.temperature_2m ?? parseFloat(CONSTANT_FALLBACK.temp);
-          const hum = weather.relative_humidity_2m ?? parseFloat(CONSTANT_FALLBACK.hum);
+          const temp = weather.temperature_2m ?? parseFloat(fallback.temp);
+          const hum = weather.relative_humidity_2m ?? parseFloat(fallback.hum);
 
           let calculatedAQI = calculateIndianAQI(pm25, pm10);
 
           if (!calculatedAQI || calculatedAQI <= 0) {
-            calculatedAQI = parseInt(CONSTANT_FALLBACK.aqi) || 52;
+            calculatedAQI = parseInt(fallback.aqi) || 52;
           }
 
           document.getElementById('aqiVal').textContent = calculatedAQI;
@@ -412,12 +483,15 @@
       setFallbackData();
 
 
-      // If dynamicMode is true, fetch live API data; otherwise stay in hardcoded mode
+      // If dynamicMode is true, fetch live API data; otherwise run regular simulated update cycle
       if (dynamicMode) {
         fetchAQIData();
 
         // Refresh every 30 seconds
         setInterval(fetchAQIData, 30000);
+      } else {
+        // Regular update cycle for offline simulated readings (refresh every 30 seconds)
+        setInterval(setFallbackData, 30000);
       }
     }
   </script>
